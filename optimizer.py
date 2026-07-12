@@ -275,6 +275,9 @@ class LogisticsOptimizer:
             return {
                 "status": status_str,
                 "total_cost": round(total_freight_cost, 2),
+                "total_units_shipped": total_units_shipped,
+                "total_truck_trips": total_truck_trips,
+                "avg_shipment_distance_km": avg_shipment_dist_km,
                 "business_kpis": business_kpis,
                 "shipments_df": pd.DataFrame(shipments),
                 "utilization_df": pd.DataFrame(utilization),

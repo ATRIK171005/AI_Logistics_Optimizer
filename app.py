@@ -206,9 +206,9 @@ with tab_opt:
         kpis = res.get("business_kpis", {})
         savings_inr = kpis.get("cost_savings_inr", 0.0)
         savings_pct = kpis.get("cost_savings_pct", 0.0)
-        total_units = kpis.get("total_units_shipped", res["total_units_shipped"])
-        total_trips = kpis.get("total_truck_trips", 5)
-        avg_dist = kpis.get("avg_shipment_distance_km", 297.0)
+        total_units = kpis.get("total_units_shipped", res.get("total_units_shipped", 1000))
+        total_trips = kpis.get("total_truck_trips", res.get("total_truck_trips", 5))
+        avg_dist = kpis.get("avg_shipment_distance_km", res.get("avg_shipment_distance_km", 297.0))
 
         # KPI Cards Row
         k1, k2, k3, k4, k5 = st.columns(5)
