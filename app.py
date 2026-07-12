@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import os
@@ -7,6 +8,7 @@ import optimizer
 import forecaster
 import visualization
 import vrp_solver
+import ui_engine
 
 # Set Streamlit page configuration
 st.set_page_config(
@@ -16,50 +18,78 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Maersk-Inspired Corporate CSS (Dark Navy #00243D + Vibrant Cyan #00E5FF)
+# Custom Maersk-Inspired Corporate CSS (Dark Navy #000F1C + Vibrant Cyan #00E5FF)
 st.markdown("""
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+    
     /* Main Background and Text */
     .stApp {
-        background: linear-gradient(135deg, #001A2C 0%, #00243D 50%, #00365A 100%);
-        color: #FFFFFF;
-        font-family: 'Inter', 'Roboto', sans-serif;
+        background: linear-gradient(135deg, #000F1C 0%, #001A2C 50%, #00243D 100%);
+        color: #DCE4E5;
+        font-family: 'Outfit', sans-serif;
     }
     
     /* Headers & Accents */
     h1, h2, h3, h4, h5, h6 {
         color: #00E5FF !important;
+        font-family: 'Outfit', sans-serif !important;
         font-weight: 700 !important;
         letter-spacing: -0.5px;
     }
     
+    /* Scanning Solver Bar Animation */
+    @keyframes scanning {
+        0% { background-position: 100% 0%; }
+        100% { background-position: -100% 0%; }
+    }
+    
     /* Glassmorphism KPI Card */
     .kpi-card {
-        background: rgba(0, 54, 90, 0.45);
-        border: 1px solid rgba(0, 229, 255, 0.35);
+        background: rgba(0, 36, 61, 0.45);
+        border: 1px solid rgba(0, 229, 255, 0.2);
         border-radius: 12px;
         padding: 18px;
         text-align: center;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        backdrop-filter: blur(8px);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         margin-bottom: 15px;
-        transition: transform 0.3s ease, border-color 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+    .kpi-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background: linear-gradient(90deg, #003061 0%, #00e5ff 50%, #003061 100%);
+        background-size: 200% 100%;
+        animation: scanning 3s linear infinite;
+        opacity: 0.7;
     }
     .kpi-card:hover {
         transform: translateY(-4px);
-        border-color: #00E5FF;
+        border-color: rgba(0, 229, 255, 0.6);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
     }
     .kpi-title {
-        font-size: 0.9rem;
+        font-size: 0.85rem;
+        font-family: 'JetBrains Mono', monospace;
         color: #A0C4DF;
         text-transform: uppercase;
-        letter-spacing: 1px;
+        letter-spacing: 1.5px;
         margin-bottom: 6px;
     }
     .kpi-value {
         font-size: 1.95rem;
+        font-family: 'JetBrains Mono', monospace;
         font-weight: 800;
         color: #00E5FF;
+        text-shadow: 0 0 10px rgba(0, 229, 255, 0.4);
     }
     .kpi-subtext {
         font-size: 0.8rem;
@@ -161,7 +191,8 @@ with col_title:
     """, unsafe_allow_html=True)
 
 # Main Navigation Tabs
-tab_opt, tab_ai, tab_viz, tab_vrp, tab_sql, tab_data = st.tabs([
+tab_mockup, tab_opt, tab_ai, tab_viz, tab_vrp, tab_sql, tab_data = st.tabs([
+    "🖥️ UI Command Center Mockups",
     "🚀 MILP Allocation Engine",
     "🔮 AI Demand Forecaster",
     "🌐 Network Analytics",
@@ -169,6 +200,124 @@ tab_opt, tab_ai, tab_viz, tab_vrp, tab_sql, tab_data = st.tabs([
     "🗄️ SQL Practice Sandbox",
     "📁 Data & Scenario Management"
 ])
+
+# ---------------------------------------------------------
+# TAB 0: HIGH-FIDELITY UI COMMAND CENTER MOCKUPS
+# ---------------------------------------------------------
+with tab_mockup:
+    st.markdown("### 🖥️ Maersk High-Fidelity UI Command Center Mockups")
+    st.write("Explore our production-ready, interactive **Tailwind & Glassmorphic HTML UI Mockups** (`#000F1C` obsidian navy + `#00E5FF` electric cyan) dynamically connected to Google OR-Tools (`SCIP` & `RoutingModel`) and ensemble ML forecasters (`XGBoost`).")
+    
+    mockup_view = st.radio(
+        "Select Interactive UI Command Center Screen to Render:",
+        ["🌐 Network Topology & Allocation Hub", "🔮 AI Demand Forecaster & Macro Simulation", "🚛 CVRP Multi-Stop Fleet Dispatch Explorer"],
+        horizontal=True
+    )
+    
+    if "Network Topology" in mockup_view:
+        file_path = "dashboard_preview.html"
+        st.markdown("#### ⚙️ Live Command Center Controls (`Google OR-Tools SCIP MILP Solver`)")
+        c_m1, c_m2, c_m3 = st.columns([1.5, 1.5, 2])
+        with c_m1:
+            if st.button("⚡ Execute SCIP MILP Solver Now", key="run_milp_mockup"):
+                opt = optimizer.LogisticsOptimizer(warehouses_df, active_customers_df, cost_df, trucks_df)
+                st.session_state["opt_results"] = opt.solve()
+                if st.session_state["opt_results"].get("status") in ["OPTIMAL", "FEASIBLE"]:
+                    database.save_shipments(st.session_state["opt_results"]["shipments_df"])
+                st.success("MILP Allocation plan calculated and injected into live mockup below!")
+        with c_m2:
+            if st.session_state["use_forecast"]:
+                if st.button("⏪ Switch to Baseline CSV Demand", key="sw_base_mockup"):
+                    st.session_state["use_forecast"] = False
+                    st.session_state["opt_results"] = None
+                    st.rerun()
+            else:
+                if st.session_state["forecast_df"] is not None:
+                    if st.button("🔮 Feed AI Forecast Demand", key="sw_ai_mockup"):
+                        st.session_state["use_forecast"] = True
+                        st.session_state["opt_results"] = None
+                        st.rerun()
+        with c_m3:
+            if st.session_state["opt_results"] and st.session_state["opt_results"].get("status") in ["OPTIMAL", "FEASIBLE"]:
+                ship_csv = st.session_state["opt_results"]["shipments_df"].to_csv(index=False).encode('utf-8')
+                st.download_button("📥 Download Optimal Plan CSV", data=ship_csv, file_name="live_command_center_plan.csv", mime="text/csv")
+
+    elif "Demand Forecaster" in mockup_view:
+        file_path = "demand_forecaster.html"
+        st.markdown("#### 🎛️ Live Macroeconomic & ML Simulation Engine (`XGBoost / Random Forest`)")
+        fc1, fc2, fc3, fc4 = st.columns(4)
+        with fc1:
+            m_choice_live = st.selectbox("ML Algorithm Engine", ["XGBoost (Preferred)", "Random Forest"], key="live_m_choice")
+        with fc2:
+            s_idx_live = st.slider("Macro Sales Index", min_value=0.8, max_value=1.5, value=1.05, step=0.01, key="live_s_idx")
+        with fc3:
+            fest_live = st.toggle("🎉 Peak Festival Surge", value=False, key="live_fest_t")
+            rain_live = st.toggle("🌧️ Monsoon Disruption", value=False, key="live_rain_t")
+        with fc4:
+            promo_live = st.slider("Promo Discount (%)", min_value=0.0, max_value=20.0, value=5.0, step=0.5, key="live_promo")
+            if st.button("🚀 Retrain & Predict Demand", key="run_fc_mockup"):
+                m_type = "xgboost" if "XGBoost" in m_choice_live else "random_forest"
+                fc_obj = forecaster.DemandForecaster(model_type=m_type)
+                metrics = fc_obj.train(historical_df)
+                pred_df = fc_obj.predict_next_month(
+                    customer_list=base_customers_df['Customer'].tolist(),
+                    sales_index=s_idx_live,
+                    festival_flag=1 if fest_live else 0,
+                    rain_flag=1 if rain_live else 0,
+                    promo_discount=promo_live
+                )
+                st.session_state["forecast_df"] = pred_df
+                st.session_state["live_fc_metrics"] = metrics
+                st.success("Forecast updated and injected into live mockup below!")
+
+    else:
+        file_path = "cvrp_explorer.html"
+        st.markdown("#### 🚛 Live Multi-Stop Fleet Dispatch Controls (`Google OR-Tools Guided Local Search`)")
+        vc1, vc2, vc3, vc4 = st.columns([1.5, 1.5, 1.5, 1.5])
+        with vc1:
+            depot_live = st.selectbox("Origin Depot Hub:", warehouses_df["Warehouse"].tolist(), key="live_dep")
+        with vc2:
+            trucks_live = st.slider("Available Local Trucks:", min_value=1, max_value=10, value=4, key="live_tr")
+        with vc3:
+            cap_live = st.slider("Truck TEU Capacity Limit:", min_value=200, max_value=800, value=450, step=50, key="live_c")
+        with vc4:
+            st.markdown("<div style='margin-top: 26px;'></div>", unsafe_allow_html=True)
+            if st.button("🚀 Schedule Multi-Stop Routes", key="run_cvrp_mockup"):
+                with st.spinner(f"Computing near-global optimal routes from '{depot_live}'..."):
+                    vrp_res = vrp_solver.run_sample_vrp(
+                        depot_name=depot_live,
+                        customers_df=active_customers_df,
+                        num_vehicles=trucks_live,
+                        vehicle_capacity=cap_live
+                    )
+                    st.session_state["cvrp_live_res"] = vrp_res
+                    if vrp_res.get("status") == "OPTIMAL":
+                        st.success("Exact CVRP loops scheduled and injected into Fleet Manifest below!")
+                    else:
+                        st.error(vrp_res.get("message", "Routing failed."))
+        
+    if os.path.exists(file_path):
+        with open("dashboard_preview.html", "r", encoding="utf-8") as f:
+            h_dash = ui_engine.populate_network_topology(f.read(), st.session_state.get("opt_results"), warehouses_df, active_customers_df)
+        with open("demand_forecaster.html", "r", encoding="utf-8") as f:
+            h_fc = ui_engine.populate_demand_forecaster(f.read(), st.session_state.get("live_fc_metrics"), st.session_state.get("forecast_df"))
+        with open("cvrp_explorer.html", "r", encoding="utf-8") as f:
+            h_cvrp = ui_engine.populate_cvrp_explorer(f.read(), st.session_state.get("cvrp_live_res"), st.session_state.get("live_dep", "Port of Rotterdam"))
+        
+        import json
+        all_screens_js = f'<script>window.ALL_SCREENS_HTML = {{ "dashboard_preview.html": {json.dumps(h_dash)}, "demand_forecaster.html": {json.dumps(h_fc)}, "cvrp_explorer.html": {json.dumps(h_cvrp)} }};</script>'
+        
+        if "Network Topology" in mockup_view:
+            html_code = h_dash.replace('<head>', '<head>' + all_screens_js, 1)
+        elif "Demand Forecaster" in mockup_view:
+            html_code = h_fc.replace('<head>', '<head>' + all_screens_js, 1)
+        else:
+            html_code = h_cvrp.replace('<head>', '<head>' + all_screens_js, 1)
+            
+        components.html(html_code, height=950, scrolling=True)
+    else:
+        st.warning(f"Mockup file `{file_path}` not found in project directory.")
+    st.markdown("---")
 
 # ---------------------------------------------------------
 # TAB 1: MILP ALLOCATION ENGINE

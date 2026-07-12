@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Maersk AI Logistics Network Optimizer | Enterprise Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            background-color: #000F1C;
+            color: #dce4e5;
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .nav-btn {
+            transition: all 0.2s ease;
+        }
+        .nav-btn.active {
+            background: rgba(0, 229, 255, 0.2);
+            color: #00E5FF;
+            border-bottom: 2px solid #00E5FF;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen">
+    <!-- Top Portal Bar -->
+    <header class="h-16 bg-[#001A2C] border-b border-[#00E5FF]/20 flex items-center justify-between px-6 shadow-xl z-50">
+        <div class="flex items-center gap-3">
+            <span class="text-2xl font-bold text-[#00E5FF]">⚓ Maersk Enterprise Hub</span>
+            <span class="text-xs bg-[#00243D] text-[#00E5FF] border border-[#00E5FF]/30 px-3 py-1 rounded-full font-mono">Operations Research & ML Platform</span>
+        </div>
+        
+        <nav class="flex h-full items-center gap-2">
+            <button onclick="switchTab('dashboard_preview.html', this)" class="nav-btn active h-full px-5 font-semibold text-sm flex items-center gap-2 hover:bg-[#00243D]/60 text-gray-300">
+                <span class="material-symbols-outlined text-sm">hub</span>
+                1. Network Topology Hub
+            </button>
+            <button onclick="switchTab('demand_forecaster.html', this)" class="nav-btn h-full px-5 font-semibold text-sm flex items-center gap-2 hover:bg-[#00243D]/60 text-gray-300">
+                <span class="material-symbols-outlined text-sm">trending_up</span>
+                2. AI Demand Forecaster
+            </button>
+            <button onclick="switchTab('cvrp_explorer.html', this)" class="nav-btn h-full px-5 font-semibold text-sm flex items-center gap-2 hover:bg-[#00243D]/60 text-gray-300">
+                <span class="material-symbols-outlined text-sm">local_shipping</span>
+                3. CVRP Fleet Dispatch
+            </button>
+        </nav>
+
+        <div class="flex items-center gap-3 font-mono text-xs text-gray-400">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                MILP & CVRP Solvers Online
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Content iframe -->
+    <main class="flex-1 w-full bg-[#000F1C]">
+        <iframe id="contentFrame" src="dashboard_preview.html" class="w-full h-full border-none"></iframe>
+    </main>
+
+    <script>
+        function switchTab(url, btn) {
+            const frame = document.getElementById('contentFrame');
+            if (frame) frame.src = url;
+            
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                b.classList.remove('active');
+                const onclickAttr = b.getAttribute('onclick') || '';
+                if (onclickAttr.includes(url) || b === btn) {
+                    b.classList.add('active');
+                }
+            });
+        }
+    </script>
+</body>
+</html>
