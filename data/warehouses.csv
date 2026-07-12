@@ -1,5 +1,5 @@
-Warehouse,Capacity
-Kolkata,600
-Mumbai,800
-Chennai,700
-Delhi,500
+Warehouse,Capacity,Latitude,Longitude,Region_Hub
+Kolkata,600,22.5726,88.3639,Eastern India Port Terminal
+Mumbai,800,19.0760,72.8777,Western India Container Terminal
+Chennai,700,13.0827,80.2707,Southern India Maritime Hub
+Delhi,500,28.7041,77.1025,Northern India Inland Depot

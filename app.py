@@ -6,10 +6,11 @@ import database
 import optimizer
 import forecaster
 import visualization
+import vrp_solver
 
 # Set Streamlit page configuration
 st.set_page_config(
-    page_title="AI-Based Logistics Network Optimizer | Maersk",
+    page_title="AI-Based Logistics Network Optimizer | Maersk Enterprise",
     page_icon="⚓",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -37,7 +38,7 @@ st.markdown("""
         background: rgba(0, 54, 90, 0.45);
         border: 1px solid rgba(0, 229, 255, 0.35);
         border-radius: 12px;
-        padding: 20px;
+        padding: 18px;
         text-align: center;
         box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         backdrop-filter: blur(8px);
@@ -49,14 +50,14 @@ st.markdown("""
         border-color: #00E5FF;
     }
     .kpi-title {
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         color: #A0C4DF;
         text-transform: uppercase;
         letter-spacing: 1px;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     .kpi-value {
-        font-size: 2.1rem;
+        font-size: 1.95rem;
         font-weight: 800;
         color: #00E5FF;
     }
@@ -82,7 +83,7 @@ st.markdown("""
         color: #A0C4DF;
         font-weight: 600;
         font-size: 0.95rem;
-        padding: 0 20px;
+        padding: 0 18px;
         transition: all 0.2s ease;
     }
     .stTabs [aria-selected="true"] {
@@ -99,83 +100,82 @@ st.markdown("""
         border: none;
         border-radius: 8px;
         padding: 10px 24px;
-        box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
         transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
     }
     .stButton > button:hover {
+        background: linear-gradient(90deg, #00E5FF 0%, #0088FF 100%);
+        box-shadow: 0 6px 18px rgba(0, 229, 255, 0.6);
         transform: scale(1.02);
-        box-shadow: 0 6px 20px rgba(0, 229, 255, 0.5);
     }
     
-    /* DataFrame Styling */
-    [data-testid="stDataFrame"] {
-        border-radius: 10px;
-        overflow: hidden;
-        border: 1px solid rgba(0, 229, 255, 0.2);
+    /* Expanders */
+    .streamlit-expanderHeader {
+        background-color: rgba(0, 36, 61, 0.8) !important;
+        color: #00E5FF !important;
+        border-radius: 8px !important;
+        font-weight: 600;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# Initialize Database and Session States
+# Initialize database tables and ensure sample CSV data is loaded exactly once on startup
 database.init_db()
 
+# Session state initialization
 if "opt_results" not in st.session_state:
     st.session_state["opt_results"] = None
 if "use_forecast" not in st.session_state:
     st.session_state["use_forecast"] = False
 if "forecast_df" not in st.session_state:
     st.session_state["forecast_df"] = None
+if "current_sql" not in st.session_state:
+    st.session_state["current_sql"] = "SELECT * FROM Warehouses;"
 
-# Load Base Datasets from SQLite
+# Load core tables from SQLite database
 warehouses_df = database.get_table_data("Warehouses")
 base_customers_df = database.get_table_data("Customers")
 cost_df = database.get_table_data("TransportationCost")
 trucks_df = database.get_table_data("Trucks")
 historical_df = database.get_table_data("HistoricalDemand")
 
-# Determine which customer demand to use
+# Determine active customer demand scenario based on AI toggle
 if st.session_state["use_forecast"] and st.session_state["forecast_df"] is not None:
     active_customers_df = st.session_state["forecast_df"]
-    demand_mode_badge = "🔮 AI Forecasted Demand Active"
+    demand_mode_badge = "⚡ Active Mode: **AI Forecasted Demand (ML Ensemble)**"
 else:
     active_customers_df = base_customers_df
-    demand_mode_badge = "📋 Base Scenario Demand Active"
+    demand_mode_badge = "⚡ Active Mode: **Baseline Customer Demand (Static CSV)**"
 
-# Header Section
-st.markdown("""
-    <div style="background: rgba(0, 36, 61, 0.6); padding: 24px; border-radius: 14px; border: 1px solid rgba(0, 229, 255, 0.3); margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
-        <div>
-            <h1 style="margin: 0; font-size: 2.3rem; color: #00E5FF;">⚓ AI-Based Logistics Network Optimizer</h1>
-            <p style="margin: 6px 0 0 0; color: #B3D8F5; font-size: 1.05rem;">
-                Internal Supply Chain & Transportation Planning Tool | Powered by Google OR-Tools & Machine Learning
-            </p>
+# Header Banner
+col_logo, col_title = st.columns([0.8, 5])
+with col_logo:
+    st.markdown("<h1 style='font-size: 3.5rem; margin-top: -10px;'>⚓</h1>", unsafe_allow_html=True)
+with col_title:
+    st.markdown("<h1>Maersk AI-Based Logistics Network Optimizer</h1>", unsafe_allow_html=True)
+    st.markdown(f"""
+        <div style="background: rgba(0, 229, 255, 0.12); border-left: 4px solid #00E5FF; padding: 10px 18px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.95rem; color: #E0F2FE;">Integrates <b>Operations Research (MILP & VRP)</b> with <b>Ensemble Machine Learning</b> for Enterprise Container Allocation.</span>
+            <span style="background: #00243D; padding: 4px 12px; border-radius: 20px; border: 1px solid #00E5FF; font-size: 0.85rem; color: #00E5FF;">{demand_mode_badge}</span>
         </div>
-        <div style="text-align: right;">
-            <span style="background: rgba(0, 229, 255, 0.15); border: 1px solid #00E5FF; color: #00E5FF; padding: 6px 16px; border-radius: 20px; font-weight: 600; font-size: 0.85rem;">
-                MAERSK ENTERPRISE LOGISTICS
-            </span>
-            <div style="margin-top: 8px; color: #7BB2D9; font-size: 0.9rem;">
-                Demand State: <b>{}</b>
-            </div>
-        </div>
-    </div>
-""".format(demand_mode_badge), unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
 
 # Main Navigation Tabs
-tab_opt, tab_ai, tab_viz, tab_sql, tab_data = st.tabs([
-    "🚀 Optimization Engine",
+tab_opt, tab_ai, tab_viz, tab_vrp, tab_sql, tab_data = st.tabs([
+    "🚀 MILP Allocation Engine",
     "🔮 AI Demand Forecaster",
     "🌐 Network Analytics",
+    "🚛 Vehicle Routing (VRP)",
     "🗄️ SQL Practice Sandbox",
     "📁 Data & Scenario Management"
 ])
 
 # ---------------------------------------------------------
-# TAB 1: OPTIMIZATION ENGINE
+# TAB 1: MILP ALLOCATION ENGINE
 # ---------------------------------------------------------
 with tab_opt:
-    st.markdown("### ⚡ Multi-Constraint Network Optimization Engine")
-    st.write("Automatically computes the cheapest shipment plan across all warehouses and customers using **Google OR-Tools (`GLOP` Linear Solver)** while strictly satisfying warehouse capacity, exact customer demand fulfillment, and total truck fleet capacities.")
+    st.markdown("### ⚡ Mixed Integer Linear Programming (MILP) Allocation Engine")
+    st.write("Automatically computes the lowest-cost container allocation using **Google OR-Tools (`SCIP` MILP Solver)** with discrete truck trip coupling, exact demand fulfillment, and explainability rationales.")
     
     col_btn1, col_btn2, col_info = st.columns([1.5, 1.5, 3])
     with col_btn1:
@@ -191,7 +191,7 @@ with tab_opt:
                     st.session_state["use_forecast"] = True
                     st.rerun()
 
-    # Automatically run optimizer on button click or if no results exist yet
+    # Automatically run optimizer if requested or not yet run
     if run_opt or st.session_state["opt_results"] is None:
         opt = optimizer.LogisticsOptimizer(warehouses_df, active_customers_df, cost_df, trucks_df)
         results = opt.solve()
@@ -203,78 +203,92 @@ with tab_opt:
 
     if res and res.get("status") in ["OPTIMAL", "FEASIBLE"]:
         total_cost = res["total_cost"]
-        total_units = res["total_units_shipped"]
-        avg_cost = round(total_cost / total_units, 2) if total_units > 0 else 0
-        total_fleet_cap = trucks_df['Capacity'].sum() if not trucks_df.empty else 0
-        fleet_util = round((total_units / total_fleet_cap) * 100, 1) if total_fleet_cap > 0 else 0
+        kpis = res.get("business_kpis", {})
+        savings_inr = kpis.get("cost_savings_inr", 0.0)
+        savings_pct = kpis.get("cost_savings_pct", 0.0)
+        total_units = kpis.get("total_units_shipped", res["total_units_shipped"])
+        total_trips = kpis.get("total_truck_trips", 5)
+        avg_dist = kpis.get("avg_shipment_distance_km", 297.0)
 
         # KPI Cards Row
-        k1, k2, k3, k4 = st.columns(4)
+        k1, k2, k3, k4, k5 = st.columns(5)
         with k1:
             st.markdown(f"""
                 <div class="kpi-card">
-                    <div class="kpi-title">Optimal Total Cost</div>
+                    <div class="kpi-title">Optimal Freight Cost</div>
                     <div class="kpi-value">₹ {total_cost:,.0f}</div>
-                    <div class="kpi-subtext">Optimized across 20 routes</div>
+                    <div class="kpi-subtext">Optimized via SCIP MILP</div>
                 </div>
             """, unsafe_allow_html=True)
         with k2:
             st.markdown(f"""
                 <div class="kpi-card">
-                    <div class="kpi-title">Total Shipped Units</div>
-                    <div class="kpi-value">{total_units:,}</div>
-                    <div class="kpi-subtext">100% Demand Fulfilled</div>
+                    <div class="kpi-title">Total Cost Savings</div>
+                    <div class="kpi-value">₹ {savings_inr:,.0f}</div>
+                    <div class="kpi-subtext">📉 {savings_pct}% vs Baseline</div>
                 </div>
             """, unsafe_allow_html=True)
         with k3:
             st.markdown(f"""
                 <div class="kpi-card">
-                    <div class="kpi-title">Average Cost / Unit</div>
-                    <div class="kpi-value">₹ {avg_cost:,.2f}</div>
-                    <div class="kpi-subtext">Weighted Route Average</div>
+                    <div class="kpi-title">Discrete Truck Trips</div>
+                    <div class="kpi-value">{total_trips} Trips</div>
+                    <div class="kpi-subtext">Coupled Fleet Allocation</div>
                 </div>
             """, unsafe_allow_html=True)
         with k4:
             st.markdown(f"""
                 <div class="kpi-card">
-                    <div class="kpi-title">Fleet Capacity Utilized</div>
-                    <div class="kpi-value">{fleet_util}%</div>
-                    <div class="kpi-subtext">Total Fleet: {total_fleet_cap:,} units</div>
+                    <div class="kpi-title">Total TEUs Shipped</div>
+                    <div class="kpi-value">{total_units:,}</div>
+                    <div class="kpi-subtext">100% Demand Fulfilled</div>
+                </div>
+            """, unsafe_allow_html=True)
+        with k5:
+            st.markdown(f"""
+                <div class="kpi-card">
+                    <div class="kpi-title">Avg Transit Distance</div>
+                    <div class="kpi-value">{avg_dist:.1f} km</div>
+                    <div class="kpi-subtext">Weighted Route Proxy</div>
                 </div>
             """, unsafe_allow_html=True)
 
         st.markdown("---")
         
-        # Step-by-Step Route Breakdown Table and Download
+        # Explainability Engine & Step-by-Step Route Breakdown
         c_left, c_right = st.columns([3, 2])
         with c_left:
-            st.markdown("#### 📋 Step-by-Step Optimal Shipment Plan")
+            st.markdown("#### 📋 Step-by-Step Optimal MILP Allocation Table")
             ship_df = res["shipments_df"]
             if not ship_df.empty:
-                display_df = ship_df[['Warehouse', 'Customer', 'UnitsShipped', 'UnitCost', 'RouteCost']].copy()
-                display_df.columns = ['Warehouse Origin', 'Customer Destination', 'Units Shipped', 'Unit Cost (₹)', 'Route Cost (₹)']
+                display_df = ship_df[['Warehouse', 'Customer', 'UnitsShipped', 'TruckTrips', 'UnitCost', 'RouteCost']].copy()
+                display_df.columns = ['Origin Hub', 'Destination Node', 'Units (TEUs)', 'Truck Trips', 'Rate (₹/unit)', 'Total Cost (₹)']
                 st.dataframe(display_df, use_container_width=True, hide_index=True)
                 
-                # Download button
                 csv_data = display_df.to_csv(index=False).encode('utf-8')
                 st.download_button(
                     label="📥 Download Optimized Plan (CSV)",
                     data=csv_data,
-                    file_name=f"optimal_logistics_plan_{res.get('run_id', 'maersk')}.csv",
+                    file_name=f"maersk_milp_optimal_plan_{res.get('run_id', 'run')}.csv",
                     mime="text/csv"
                 )
+
+                st.markdown("#### 🧠 Automated Decision Explainability Panel")
+                st.write("Select any active route below to inspect the mathematical dual and capacity rationale:")
+                for idx, row in ship_df.iterrows():
+                    with st.expander(f"📌 Why did Hub '{row['Warehouse']}' supply Client '{row['Customer']}' ({row['UnitsShipped']} TEUs)?"):
+                        st.markdown(f"**Explaining Allocation Decision:** `{row.get('ExplainabilityRationale', 'Optimized via SCIP.')}`")
             else:
-                st.info("No shipments generated.")
+                st.info("No active shipments generated.")
 
         with c_right:
             st.markdown("#### 🔄 Route Flow Visual Cards")
             if not ship_df.empty:
-                # Group by warehouse to show clean card flow like in Step 4 of prompt
                 grouped = ship_df.groupby('Warehouse')
                 for w_name, group in grouped:
-                    flow_str = f"🏢 **Warehouse {w_name}**"
+                    flow_str = f"🏢 **Hub {w_name}**"
                     for _, s_row in group.iterrows():
-                        flow_str += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;➔ **{s_row['Customer']}** = <span style='color: #00E5FF; font-weight: bold;'>{s_row['UnitsShipped']} units</span> (₹{s_row['RouteCost']:,.0f})"
+                        flow_str += f"<br>&nbsp;&nbsp;&nbsp;&nbsp;➔ **{s_row['Customer']}** = <span style='color: #00E5FF; font-weight: bold;'>{s_row['UnitsShipped']} TEUs ({s_row.get('TruckTrips', 1)} Truck)</span> [₹{s_row['RouteCost']:,.0f}]"
                     
                     st.markdown(f"""
                         <div style="background: rgba(0, 26, 44, 0.7); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 10px; padding: 14px; margin-bottom: 12px;">
@@ -293,28 +307,33 @@ with tab_opt:
 # TAB 2: AI DEMAND FORECASTER
 # ---------------------------------------------------------
 with tab_ai:
-    st.markdown("### 🔮 Machine Learning Demand Forecasting Component")
-    st.write("To make this platform more than just standard linear optimization, we train ensemble tree models (**XGBoost / Random Forest**) on historical monthly demand data enriched with macroeconomic and seasonal indicators.")
+    st.markdown("### 🔮 Machine Learning Demand Forecasting Component (`XGBoost / RandomForest`)")
+    st.write("Ensemble tree models predict monthly container demand enriched with macroeconomic indices (`Sales_Index`), seasonal surges (`Festival_Flag`), and weather interruptions (`Rain_Storm_Flag`).")
     
-    col_ctrl, col_chart = st.columns([1.2, 2.8])
+    col_ctrl, col_chart = st.columns([1.3, 2.7])
     with col_ctrl:
-        st.markdown("#### 🎛️ Simulation Controls")
-        model_choice = st.selectbox("ML Algorithm Type", ["XGBoost (Preferred)", "Random Forest"])
+        st.markdown("#### 🎛️ Simulation & Model Controls")
+        model_choice = st.selectbox("ML Algorithm Engine", ["XGBoost (Preferred)", "Random Forest"])
         m_type = "xgboost" if "XGBoost" in model_choice else "random_forest"
         
-        sales_idx = st.slider("Macro Sales Index", min_value=0.8, max_value=1.3, value=1.05, step=0.01, help="Regional purchasing power index (1.0 = Normal baseline)")
-        festival_flag = st.toggle("🎉 Peak Festival Season (Diwali / Eid)", value=False, help="Adds surge demand for holiday stocking")
-        rain_flag = st.toggle("🌧️ Monsoon / Heavy Rainfall Disturbance", value=False, help="Reflects weather-induced stocking shifts")
+        sales_idx = st.slider("Macro Sales Index", min_value=0.8, max_value=1.3, value=1.05, step=0.01)
+        festival_flag = st.toggle("🎉 Peak Festival Season (Diwali / Eid)", value=False)
+        rain_flag = st.toggle("🌧️ Monsoon / Heavy Rainfall Disturbance", value=False)
         promo_discount = st.slider("Bulk Discount Promo (%)", min_value=0.0, max_value=15.0, value=5.0, step=0.5)
 
         # Train ML Model
         forecaster_obj = forecaster.DemandForecaster(model_type=m_type)
-        r2, mae = forecaster_obj.train(historical_df)
+        metrics = forecaster_obj.train(historical_df)
         
         st.markdown(f"""
-            <div style="background: rgba(0, 229, 255, 0.1); border-left: 4px solid #00E5FF; padding: 12px; border-radius: 6px; margin-top: 15px;">
-                <div style="font-size: 0.85rem; color: #B3D8F5;">Model Training Accuracy</div>
-                <div style="font-size: 1.1rem; font-weight: bold; color: #00E5FF;">R² Score: {r2:.3f} | MAE: {mae:.1f} units</div>
+            <div style="background: rgba(0, 54, 90, 0.6); border: 1px solid #00E5FF; padding: 14px; border-radius: 8px; margin-top: 15px;">
+                <div style="font-size: 0.85rem; color: #A0C4DF; text-transform: uppercase;">Prediction Accuracy Audit</div>
+                <div style="font-size: 1.1rem; font-weight: bold; color: #00E5FF; margin-top: 4px;">
+                    RMSE: {metrics.get('rmse', 0.0)} | MAE: {metrics.get('mae', 0.0)}
+                </div>
+                <div style="font-size: 0.9rem; color: #7BB2D9; margin-top: 4px;">
+                    MAPE: <b>{metrics.get('mape', 0.0)}%</b> | R² Score: <b>{metrics.get('r2', 0.0)}</b>
+                </div>
             </div>
         """, unsafe_allow_html=True)
 
@@ -328,18 +347,22 @@ with tab_ai:
         )
         st.session_state["forecast_df"] = pred_df
 
-        if st.button("⚡ Feed Forecast into Optimizer", key="apply_ai_btn"):
+        if st.button("⚡ Feed Forecast into MILP Optimizer", key="apply_ai_btn"):
             st.session_state["use_forecast"] = True
-            st.session_state["opt_results"] = None # Re-run optimizer automatically
-            st.success("AI Forecasted demand loaded! Switch to the Optimization Engine tab to see updated results.")
+            st.session_state["opt_results"] = None
+            st.success("AI Forecast loaded! Switch to MILP Allocation Engine to inspect downstream freight cost impact.")
             st.rerun()
 
     with col_chart:
-        st.markdown("#### 📊 Base vs Predicted Next Month Demand Comparison")
+        st.markdown("#### 📊 Downstream ML Integration Pipeline")
+        st.markdown("""
+            <div style="background: rgba(0, 229, 255, 0.08); border: 1px dashed #00E5FF; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 12px; font-weight: 600;">
+                🔮 Predicted Customer Demand ➔ ⚡ OR-Tools MILP Allocation Engine ➔ 💰 Minimal Transportation Spend
+            </div>
+        """, unsafe_allow_html=True)
         fig_comp = visualization.plot_demand_comparison(base_customers_df, pred_df)
         st.plotly_chart(fig_comp, use_container_width=True)
         
-        # Show feature importances
         st.markdown("#### 📈 ML Feature Importance Analysis")
         df_imp = forecaster_obj.get_feature_importances()
         if not df_imp.empty:
@@ -356,7 +379,6 @@ with tab_viz:
         res_df = st.session_state["opt_results"]["shipments_df"]
         util_df = st.session_state["opt_results"]["utilization_df"]
         
-        # Interactive Network Graph
         fig_net = visualization.plot_logistics_network(res_df, warehouses_df, active_customers_df)
         st.plotly_chart(fig_net, use_container_width=True)
         
@@ -368,41 +390,105 @@ with tab_viz:
             fig_cost = visualization.plot_cost_breakdown(res_df)
             st.plotly_chart(fig_cost, use_container_width=True)
     else:
-        st.info("💡 Please run the optimization in the **Optimization Engine** tab to unlock live network graphs and charts.")
+        st.info("💡 Please run the optimization in the **MILP Allocation Engine** tab to unlock live network graphs and charts.")
 
 # ---------------------------------------------------------
-# TAB 4: SQL PRACTICE SANDBOX
+# TAB 4: VEHICLE ROUTING PROBLEM (VRP)
+# ---------------------------------------------------------
+with tab_vrp:
+    st.markdown("### 🚛 Capacitated Vehicle Routing Problem (CVRP) Delivery Engine")
+    st.write("While the **MILP Allocation Engine** determines *how many* TEUs to ship between regional hubs, the **VRP Delivery Engine** uses **Google OR-Tools (`RoutingModel` with Guided Local Search)** to schedule exact multi-stop delivery loops (`Depot ➔ Stop A ➔ Stop B ➔ Depot`) for local truck fleets.")
+    
+    col_vrp_ctrl, col_vrp_res = st.columns([1.3, 2.7])
+    with col_vrp_ctrl:
+        st.markdown("#### ⚙️ Local Depot Routing Setup")
+        selected_depot = st.selectbox("Select Origin Hub Depot:", warehouses_df["Warehouse"].tolist())
+        num_vrp_trucks = st.slider("Available Local Delivery Trucks:", min_value=1, max_value=5, value=3)
+        vrp_truck_cap = st.slider("Truck TEU Carrying Limit:", min_value=200, max_value=600, value=450, step=50)
+        
+        run_vrp = st.button("🚀 Schedule Multi-Stop Routes", key="run_vrp_btn")
+    
+    with col_vrp_res:
+        if run_vrp:
+            with st.spinner(f"Computing near-global optimal multi-stop routes from '{selected_depot}' using Guided Local Search..."):
+                vrp_result = vrp_solver.run_sample_vrp(
+                    depot_name=selected_depot,
+                    customers_df=active_customers_df,
+                    num_vehicles=num_vrp_trucks,
+                    vehicle_capacity=vrp_truck_cap
+                )
+                
+            if vrp_result.get("status") == "OPTIMAL":
+                st.success(f"✅ VRP Routes Scheduled successfully for Depot **{selected_depot}**!")
+                
+                v_kpi1, v_kpi2, v_kpi3 = st.columns(3)
+                with v_kpi1:
+                    st.metric("Active Delivery Trucks", f"{vrp_result['active_trucks_count']} / {num_vrp_trucks} Trucks")
+                with v_kpi2:
+                    st.metric("Total Distance Traveled", f"{vrp_result['total_distance_km']:,} km")
+                with v_kpi3:
+                    st.metric("Total TEUs Dropped Off", f"{vrp_result['total_load_delivered']} TEUs")
+                
+                st.markdown("#### 🛣️ Multi-Stop Vehicle Route Itineraries")
+                st.dataframe(vrp_result["routes_df"], use_container_width=True, hide_index=True)
+            else:
+                st.error(f"❌ {vrp_result.get('message', 'Infeasible routing configuration.')}")
+        else:
+            st.info("👈 Select a depot and click **Schedule Multi-Stop Routes** to run the CVRP Routing Library engine.")
+
+# ---------------------------------------------------------
+# TAB 5: SQL PRACTICE SANDBOX & ANALYTICS
 # ---------------------------------------------------------
 with tab_sql:
-    st.markdown("### 🗄️ SQLite Database Exploration & SQL Practice Sandbox")
-    st.write("Satisfy our required SQL skills by exploring the `logistics.db` schema and executing live SQL queries directly against our tables (`Warehouses`, `Customers`, `TransportationCost`, `Trucks`, `Shipments`).")
+    st.markdown("### 🗄️ SQLite Database Exploration & Advanced SQL Analytics")
+    st.write("Demonstrates SQL proficiency beyond simple persistence by executing pre-built analytical queries and live exploratory SQL against our 3NF schema (`Warehouses`, `Customers`, `TransportationCost`, `Trucks`, `Shipments`).")
     
     col_sql_left, col_sql_right = st.columns([1.3, 2.7])
     
     with col_sql_left:
-        st.markdown("#### 📋 Quick Practice Queries")
-        st.write("Click any pre-built SQL query below to execute instantly:")
+        st.markdown("#### 📊 Advanced SQL Analytics Reports")
+        st.write("Click to execute Maersk Portfolio SQL reports (`database.py`):")
         
+        if st.button("📈 Shipment History Audit Trail", key="sql_rep_1"):
+            df_rep = database.get_shipment_history()
+            st.session_state["custom_sql_rep"] = ("Shipment History Audit Trail (Top 100 Runs)", df_rep)
+        if st.button("🏢 Warehouse Financial Spend Analytics", key="sql_rep_2"):
+            df_rep = database.get_warehouse_analytics()
+            st.session_state["custom_sql_rep"] = ("Warehouse Financial Spend & Volume Analytics", df_rep)
+        if st.button("📅 Monthly Cost & Fleet Dispatch Reports", key="sql_rep_3"):
+            df_rep = database.get_monthly_cost_reports()
+            st.session_state["custom_sql_rep"] = ("Monthly Time-Series Transportation Cost Reports", df_rep)
+        if st.button("🔀 O-D Corridor Performance Benchmarks", key="sql_rep_4"):
+            df_rep = database.get_route_performance()
+            st.session_state["custom_sql_rep"] = ("Origin-Destination Route Performance Queries", df_rep)
+
+        st.markdown("---")
+        st.markdown("#### 📋 Quick Practice Queries")
         if st.button("🔍 `SELECT * FROM Warehouses;`", key="sql_btn_1"):
             st.session_state["current_sql"] = "SELECT * FROM Warehouses;"
         if st.button("🚛 `SELECT SUM(Capacity) FROM Trucks;`", key="sql_btn_2"):
             st.session_state["current_sql"] = "SELECT SUM(Capacity) AS Total_Truck_Capacity FROM Trucks;"
-        if st.button("💰 `SELECT Warehouse, SUM(RouteCost) as Total_Cost FROM Shipments GROUP BY Warehouse;`", key="sql_btn_3"):
+        if st.button("💰 `SELECT Warehouse, SUM(RouteCost) FROM Shipments GROUP BY Warehouse;`", key="sql_btn_3"):
             st.session_state["current_sql"] = "SELECT Warehouse, SUM(RouteCost) AS Total_Shipping_Cost, SUM(UnitsShipped) AS Total_Units FROM Shipments GROUP BY Warehouse;"
-        if st.button("🛒 `SELECT * FROM Customers WHERE Demand >= 200;`", key="sql_btn_4"):
-            st.session_state["current_sql"] = "SELECT * FROM Customers WHERE Demand >= 200 ORDER BY Demand DESC;"
-        if st.button("📜 `SELECT * FROM TransportationCost WHERE Cost < 15;`", key="sql_btn_5"):
-            st.session_state["current_sql"] = "SELECT * FROM TransportationCost WHERE Cost < 15 ORDER BY Cost ASC;"
 
-        st.markdown("#### 🗂️ Database Tables")
+        st.markdown("#### 🗂️ Database Table Schema")
         selected_table_preview = st.selectbox("Inspect Table Schema:", ["Warehouses", "Customers", "TransportationCost", "Trucks", "Shipments", "HistoricalDemand"])
         df_preview = database.get_table_data(selected_table_preview)
         st.write(f"Row count: `{len(df_preview)} rows`")
 
     with col_sql_right:
+        if "custom_sql_rep" in st.session_state and st.session_state["custom_sql_rep"]:
+            rep_title, rep_df = st.session_state["custom_sql_rep"]
+            st.markdown(f"#### ⭐ Advanced SQL Report: `{rep_title}`")
+            st.dataframe(rep_df, use_container_width=True)
+            if st.button("✖️ Clear Report View"):
+                st.session_state["custom_sql_rep"] = None
+                st.rerun()
+            st.markdown("---")
+
         st.markdown("#### 💻 Interactive SQL Query Runner")
         default_sql = st.session_state.get("current_sql", "SELECT * FROM Warehouses;")
-        query_input = st.text_area("Type your custom SQL query below:", value=default_sql, height=110)
+        query_input = st.text_area("Type your custom SQL query below:", value=default_sql, height=100)
         
         if st.button("⚡ Execute SQL Query", key="run_sql_btn"):
             df_sql_res, error_msg = database.execute_sql_query(query_input)
@@ -417,11 +503,11 @@ with tab_sql:
         st.dataframe(df_preview, use_container_width=True)
 
 # ---------------------------------------------------------
-# TAB 5: DATA & SCENARIO MANAGEMENT
+# TAB 6: DATA & SCENARIO MANAGEMENT
 # ---------------------------------------------------------
 with tab_data:
     st.markdown("### 📁 Custom CSV Uploads & Scenario Management")
-    st.write("Upload custom CSV files to simulate different warehouse networks, or reset to the default Maersk interview scenario at any time.")
+    st.write("Upload custom CSV files (`warehouses.csv` with Latitude/Longitude, etc.) to simulate new networks, or reset to our enriched Maersk baseline.")
     
     col_u1, col_u2, col_u3, col_u4 = st.columns(4)
     with col_u1:
@@ -462,17 +548,17 @@ with tab_data:
             st.rerun()
 
     st.markdown("---")
-    if st.button("🔄 Reset Database & CSVs to Maersk Default Scenario", key="reset_btn"):
+    if st.button("🔄 Reset Database & CSVs to Enriched Maersk Default Scenario", key="reset_btn"):
         database.seed_data_from_csvs(overwrite=True)
         st.session_state["opt_results"] = None
         st.session_state["use_forecast"] = False
-        st.success("Successfully reset all datasets to our default Maersk scenario!")
+        st.success("Successfully reset all datasets to our enriched Maersk scenario!")
         st.rerun()
 
 # Footer
 st.markdown("---")
 st.markdown("""
     <div style="text-align: center; color: #7BB2D9; font-size: 0.85rem; padding: 10px;">
-        AI-Based Logistics Network Optimizer | Built with Python, Google OR-Tools, SQLite, Plotly & Streamlit | Maersk Logistics Portfolio Project
+        AI-Based Logistics Network Optimizer | Built with Python, Google OR-Tools (MILP & VRP), SQLite, Plotly & Streamlit | Maersk Logistics Portfolio Project
     </div>
 """, unsafe_allow_html=True)

@@ -1,6 +1,6 @@
-Customer,Demand
-Pune,200
-Jaipur,150
-Lucknow,180
-Bangalore,250
-Hyderabad,220
+Customer,Demand,Latitude,Longitude,Client_Type
+Pune,200,18.5204,73.8567,Automotive Assembly Plant
+Jaipur,150,26.9124,75.7873,Textile & Consumer Goods ICD
+Lucknow,180,26.8467,80.9462,Agro-Processing & Retail Hub
+Bangalore,250,12.9716,77.5946,Electronics & IT Distribution Center
+Hyderabad,220,17.3850,78.4867,Pharma & Industrial Logistics Park

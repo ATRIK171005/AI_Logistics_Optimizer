@@ -77,6 +77,16 @@ def init_db():
         )
     """)
 
+    # Alter Shipments table to ensure MILP integer and explainability columns exist
+    try:
+        cursor.execute("ALTER TABLE Shipments ADD COLUMN TruckTrips INTEGER DEFAULT 1")
+    except Exception:
+        pass
+    try:
+        cursor.execute("ALTER TABLE Shipments ADD COLUMN ExplainabilityRationale TEXT")
+    except Exception:
+        pass
+
     conn.commit()
     conn.close()
 
@@ -127,10 +137,17 @@ def save_shipments(shipments_df):
         return
     conn = get_connection()
     try:
-        # Rename column to match table schema if needed
         df_to_save = shipments_df.copy()
         if 'Units Shipped' in df_to_save.columns:
             df_to_save.rename(columns={'Units Shipped': 'UnitsShipped'}, inplace=True)
+        # Drop columns that don't match table schema cleanly or ensure they exist
+        cols_to_keep = ['RunID', 'Warehouse', 'Customer', 'UnitsShipped', 'UnitCost', 'RouteCost', 'Timestamp']
+        if 'TruckTrips' in df_to_save.columns:
+            cols_to_keep.append('TruckTrips')
+        if 'ExplainabilityRationale' in df_to_save.columns:
+            cols_to_keep.append('ExplainabilityRationale')
+        
+        df_to_save = df_to_save[[c for c in cols_to_keep if c in df_to_save.columns]]
         df_to_save.to_sql("Shipments", conn, if_exists="append", index=False)
     except Exception as e:
         print(f"Error saving shipments: {e}")
@@ -154,6 +171,102 @@ def get_table_data(table_name: str):
     try:
         return pd.read_sql_query(f"SELECT * FROM {table_name}", conn)
     except Exception as e:
+        return pd.DataFrame()
+    finally:
+        conn.close()
+
+# =====================================================================
+# ADVANCED SQL ANALYTICS QUERIES (Maersk Portfolio Flaw #8)
+# =====================================================================
+def get_shipment_history(run_id: str = None) -> pd.DataFrame:
+    """Retrieves full historical audit trail of MILP optimization runs."""
+    conn = get_connection()
+    try:
+        query = """
+            SELECT RunID, Warehouse, Customer, UnitsShipped, UnitCost, RouteCost, 
+                   COALESCE(TruckTrips, 1) as TruckTrips,
+                   COALESCE(ExplainabilityRationale, 'Standard allocation') as Rationale,
+                   Timestamp
+            FROM Shipments
+            ORDER BY id DESC LIMIT 100
+        """
+        if run_id:
+            query = f"SELECT * FROM Shipments WHERE RunID = '{run_id}' ORDER BY id DESC"
+        return pd.read_sql_query(query, conn)
+    except Exception as e:
+        print(f"SQL Error in get_shipment_history: {e}")
+        return pd.DataFrame()
+    finally:
+        conn.close()
+
+def get_warehouse_analytics() -> pd.DataFrame:
+    """Aggregates total volume dispatched, total freight spend, and average route cost per warehouse hub."""
+    conn = get_connection()
+    try:
+        query = """
+            SELECT 
+                w.Warehouse,
+                w.Capacity as Max_Hub_Capacity,
+                COALESCE(SUM(s.UnitsShipped), 0) as Total_Units_Dispatched,
+                COALESCE(SUM(s.RouteCost), 0.0) as Total_Freight_Spend_INR,
+                COALESCE(SUM(s.TruckTrips), 0) as Total_Truck_Trips_Assigned,
+                ROUND(COALESCE(AVG(s.UnitCost), 0.0), 2) as Avg_Unit_Transport_Rate
+            FROM Warehouses w
+            LEFT JOIN Shipments s ON w.Warehouse = s.Warehouse
+            GROUP BY w.Warehouse
+            ORDER BY Total_Freight_Spend_INR DESC
+        """
+        return pd.read_sql_query(query, conn)
+    except Exception as e:
+        print(f"SQL Error in get_warehouse_analytics: {e}")
+        return pd.DataFrame()
+    finally:
+        conn.close()
+
+def get_monthly_cost_reports() -> pd.DataFrame:
+    """Generates time-series financial aggregation of transportation burn by month."""
+    conn = get_connection()
+    try:
+        query = """
+            SELECT 
+                SUBSTR(Timestamp, 1, 7) as Month_Period,
+                COUNT(DISTINCT RunID) as Total_Optimization_Runs,
+                SUM(UnitsShipped) as Monthly_TEUs_Moved,
+                SUM(COALESCE(TruckTrips, 1)) as Total_Fleet_Dispatches,
+                ROUND(SUM(RouteCost), 2) as Monthly_Total_Transport_Cost_INR,
+                ROUND(AVG(RouteCost), 2) as Average_Route_Spend_INR
+            FROM Shipments
+            WHERE Timestamp IS NOT NULL
+            GROUP BY SUBSTR(Timestamp, 1, 7)
+            ORDER BY Month_Period DESC
+        """
+        return pd.read_sql_query(query, conn)
+    except Exception as e:
+        print(f"SQL Error in get_monthly_cost_reports: {e}")
+        return pd.DataFrame()
+    finally:
+        conn.close()
+
+def get_route_performance() -> pd.DataFrame:
+    """Analyzes O-D pairwise corridor frequency, unit cost consistency, and volume throughput."""
+    conn = get_connection()
+    try:
+        query = """
+            SELECT 
+                Warehouse as Origin_Hub,
+                Customer as Destination_Node,
+                COUNT(*) as Dispatch_Frequency,
+                SUM(UnitsShipped) as Cumulative_TEUs_Moved,
+                SUM(COALESCE(TruckTrips, 1)) as Total_Truck_Trips,
+                ROUND(AVG(UnitCost), 2) as Mean_Unit_Freight_Rate_INR,
+                ROUND(SUM(RouteCost), 2) as Total_Corridor_Spend_INR
+            FROM Shipments
+            GROUP BY Warehouse, Customer
+            ORDER BY Cumulative_TEUs_Moved DESC
+        """
+        return pd.read_sql_query(query, conn)
+    except Exception as e:
+        print(f"SQL Error in get_route_performance: {e}")
         return pd.DataFrame()
     finally:
         conn.close()
