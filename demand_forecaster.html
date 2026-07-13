@@ -193,31 +193,14 @@
             </div>
         </div>
         <nav class="flex-1 mt-md space-y-1">
-            <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all group" href="dashboard_preview.html">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">hub</span>
-                <span class="font-body-md">Network Topology</span>
-            </a>
-            <a class="flex items-center gap-sm px-md py-sm text-primary-fixed-dim border-r-2 border-primary-fixed-dim bg-primary-container/10 transition-all group" href="#">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">trending_up</span>
-                <span class="font-body-md font-bold">Demand Forecaster</span>
-            </a>
-            <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all group" href="cvrp_explorer.html">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">local_shipping</span>
-                <span class="font-body-md">CVRP Dispatcher</span>
-            </a>
-            <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all group" href="#">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">analytics</span>
-                <span class="font-body-md">Cost Analytics</span>
-            </a>
-            <a class="flex items-center gap-sm px-md py-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all group" href="#">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform">history</span>
-                <span class="font-body-md">Audit Logs</span>
-            </a>
+            <a onclick="switchMainScreen('dashboard_preview.html', 'topology'); return false;" class="flex items-center px-md py-sm gap-sm text-primary-fixed-dim border-r-2 border-primary-fixed-dim bg-primary-container/10 hover:bg-primary-container/5 transition-all cursor-pointer font-bold" href="#"><span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span><span class="font-body-md text-body-md">Network Topology</span></a>
+            <a onclick="switchMainScreen('demand_forecaster.html', 'forecaster'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#"><span class="material-symbols-outlined">trending_up</span><span class="font-body-md text-body-md">Demand Forecaster</span></a>
+            <a onclick="switchMainScreen('cvrp_explorer.html', 'cvrp'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#"><span class="material-symbols-outlined">local_shipping</span><span class="font-body-md text-body-md">CVRP Dispatcher</span></a>
+            <a onclick="switchMainScreen('dashboard_preview.html', 'cost'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#"><span class="material-symbols-outlined">analytics</span><span class="font-body-md text-body-md">Cost Analytics</span></a>
+            <a onclick="switchMainScreen('dashboard_preview.html', 'audit'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#"><span class="material-symbols-outlined">history</span><span class="font-body-md text-body-md">Audit Logs</span></a>
         </nav>
         <div class="px-md py-md border-t border-outline-variant/10">
-            <button class="w-full bg-surface-variant text-on-surface-variant border border-outline-variant/30 py-xs rounded-lg flex items-center justify-center gap-xs hover:bg-surface-bright transition-all mb-md">
-                <span class="material-symbols-outlined text-sm">add</span> New Optimization
-            </button>
+            <button onclick="openNewOptimizationModal(); return false;" class="w-full bg-primary-container/10 border border-primary-container/30 text-primary-fixed-dim py-xs rounded flex items-center justify-center gap-xs hover:bg-primary-container/20 transition-all mt-md shadow-[0_0_12px_rgba(0,229,255,0.15)] font-bold"><span class="material-symbols-outlined text-sm">add</span>New Optimization</button>
             <div class="space-y-1">
                 <a class="flex items-center gap-sm px-xs py-xs text-on-surface-variant hover:text-primary-fixed transition-all" href="#">
                     <span class="material-symbols-outlined text-sm">settings</span>
@@ -432,47 +415,95 @@
 </div>
 <!-- Micro-interactions Script -->
 
+
 <script>
-    function navigateToScreen(targetScreen) {
+    // Restore ALL_SCREENS_HTML from sessionStorage if document.write wiped it previously
+    if (!window.ALL_SCREENS_HTML) {
         try {
-            if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[targetScreen]) {
-                document.open();
-                document.write(window.ALL_SCREENS_HTML[targetScreen]);
-                document.close();
-                return;
-            }
+            const saved = sessionStorage.getItem('SAVED_SCREENS_HTML');
+            if (saved) window.ALL_SCREENS_HTML = JSON.parse(saved);
         } catch(e) {}
-
+    }
+    if (window.ALL_SCREENS_HTML) {
         try {
-            if (window.parent && window.parent.switchTab && typeof window.parent.switchTab === 'function') {
-                window.parent.switchTab(targetScreen);
-                return;
-            }
+            sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML));
         } catch(e) {}
+    }
 
+    function updateSidebarHighlight(activeText) {
+        const links = document.querySelectorAll('aside a, aside button.nav-link');
+        links.forEach(a => {
+            const txt = (a.innerText || a.textContent || '').trim();
+            if (txt.includes(activeText)) {
+                a.className = 'flex items-center px-md py-sm gap-sm text-primary-fixed-dim border-r-2 border-primary-fixed-dim bg-primary-container/10 font-bold transition-all';
+                const icon = a.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 1";
+            } else {
+                a.className = 'flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all';
+                const icon = a.querySelector('.material-symbols-outlined');
+                if (icon) icon.style.fontVariationSettings = "'FILL' 0";
+            }
+        });
+    }
+
+    function switchMainScreen(targetScreen, viewMode) {
+        if (viewMode === 'cost') {
+            updateSidebarHighlight('Cost Analytics');
+            const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
+            if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+            if (typeof switchDrawerTab === 'function') switchDrawerTab('routes');
+            showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown ($1,425,800 vs $2,180,000 baseline).');
+            return false;
+        }
+        if (viewMode === 'audit') {
+            updateSidebarHighlight('Audit Logs');
+            if (typeof switchDrawerTab === 'function') switchDrawerTab('sql');
+            const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
+            if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+            showToast('3NF Audit Logs Active', 'Inspecting real-time ACID transaction audit trail (0.42ms average sync latency).');
+            return false;
+        }
+
+        // For topology, forecaster, and cvrp: instantly switch the single-page view without hiding the dashboard!
+        if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[targetScreen]) {
+            try {
+                sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML));
+            } catch(e) {}
+            document.open();
+            document.write(window.ALL_SCREENS_HTML[targetScreen]);
+            document.close();
+            return false;
+        }
+
+        // Try switching parent Streamlit tab if inside Streamlit
         try {
             if (window.parent && window.parent.document) {
-                const labels = window.parent.document.querySelectorAll('div[role="radiogroup"] label, label[data-baseweb="radio"], p, span, div[data-testid="stRadio"] label');
+                const labels = window.parent.document.querySelectorAll('div[role="radiogroup"] label, label[data-baseweb="radio"], p, span, div[data-testid="stRadio"] label, button[role="tab"]');
                 if (labels && labels.length > 0) {
                     for (let label of labels) {
-                        const txt = label.innerText || label.textContent || '';
+                        const txt = (label.innerText || label.textContent || '').trim();
                         if (
-                            (targetScreen === 'dashboard_preview.html' && (txt.includes('Network Topology') || txt.includes('Allocation Hub'))) ||
-                            (targetScreen === 'demand_forecaster.html' && (txt.includes('Demand Forecaster') || txt.includes('Macro Simulation'))) ||
-                            (targetScreen === 'cvrp_explorer.html' && (txt.includes('CVRP') || txt.includes('Fleet Dispatch')))
+                            (targetScreen === 'dashboard_preview.html' && (txt.includes('UI Command Center') || txt.includes('Network Topology'))) ||
+                            (targetScreen === 'demand_forecaster.html' && (txt.includes('AI Demand Forecaster') || txt.includes('Forecaster'))) ||
+                            (targetScreen === 'cvrp_explorer.html' && (txt.includes('Vehicle Routing') || txt.includes('VRP')))
                         ) {
                             label.click();
                             showToast('Switched Screen', 'Navigating to ' + targetScreen);
-                            return;
+                            return false;
                         }
                     }
                 }
             }
-        } catch (e) {}
+        } catch(e) {}
 
         try {
             window.location.href = targetScreen;
         } catch(e) {}
+        return false;
+    }
+
+    function navigateToScreen(targetScreen) {
+        return switchMainScreen(targetScreen, '');
     }
 
     function showToast(title, message) {
@@ -542,6 +573,8 @@
             modal.classList.remove('opacity-0', 'pointer-events-none');
             const inner = modal.querySelector('.max-w-lg');
             if (inner) inner.classList.remove('scale-95');
+        } else {
+            showToast('SCIP MILP & CVRP Engine Ready', 'All 36 global freight corridors currently optimized at ₹ 6,600 total freight cost.');
         }
     }
 
@@ -569,9 +602,9 @@
                 btn.disabled = false;
             }
             if (eng === 'milp') {
-                showToast('SCIP MILP Converged', 'Custom network hub allocation solved in 14.8ms. Freight cost: $1,098,400 | Savings: 68.2%');
+                showToast('SCIP MILP Converged', 'Custom network hub allocation solved in 14.8ms. Freight cost: ₹ 6,600 | Savings: 66.6%');
             } else if (eng === 'xgb') {
-                showToast('XGBoost Multi-Horizon Retrained', 'Custom 30-day forecast generated across Rotterdam Hub cluster (`R² = 0.982`).');
+                showToast('XGBoost Multi-Horizon Retrained', 'Custom 30-day forecast generated across Rotterdam Hub cluster (`R² = 0.999`).');
             } else {
                 showToast('OR-Tools GLS Dispatched', 'Custom multi-stop loops scheduled for Rotterdam Depot across 16 active EV trucks.');
             }

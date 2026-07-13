@@ -249,7 +249,7 @@ with tab_mockup:
     
     final_spa_code = h_dash_clean.replace('<head>', '<head>' + live_screens_js, 1)
     
-    components.html(final_spa_code, height=1150, scrolling=True)
+    components.html(final_spa_code, height=980, scrolling=False)
 
 # ---------------------------------------------------------
 # TAB 1: MILP ALLOCATION ENGINE
