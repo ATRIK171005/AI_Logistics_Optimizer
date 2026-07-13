@@ -210,7 +210,7 @@ with tab_mockup:
     st.markdown("### ⚓ Maersk AI Logistics Enterprise Command Center")
     st.write("Full-screen, ultra-low latency **Single-Page Operations Research & ML Platform** (`#000F1C` obsidian navy + `#00E5FF` electric cyan). Use the left navigation bar (`Network Topology`, `Demand Forecaster`, `CVRP Dispatcher`, `+ New Optimization`) to switch views instantly.")
     
-    # Load the pure Single-Page Application (index.html) populated with live data
+    # Load and populate clean templates
     with open("dashboard_preview.html", "r", encoding="utf-8") as f:
         h_dash_live = ui_engine.populate_network_topology(f.read(), st.session_state.get("opt_results"), warehouses_df, active_customers_df)
     with open("demand_forecaster.html", "r", encoding="utf-8") as f:
@@ -218,17 +218,23 @@ with tab_mockup:
     with open("cvrp_explorer.html", "r", encoding="utf-8") as f:
         h_cvrp_live = ui_engine.populate_cvrp_explorer(f.read(), st.session_state.get("cvrp_live_res"), st.session_state.get("live_dep", "Port of Rotterdam"))
         
-    live_screens_dict = {
-        "dashboard_preview.html": h_dash_live,
-        "demand_forecaster.html": h_fc_live,
-        "cvrp_explorer.html": h_cvrp_live,
-        "index.html": h_dash_live
-    }
-    live_screens_js = f'<script>window.ALL_SCREENS_HTML = {json.dumps(live_screens_dict)};</script>'
+    # Strip any prior window.ALL_SCREENS_HTML so we don't nest infinitely
+    def strip_all_screens(s):
+        return re.sub(r'<script>window\.ALL_SCREENS_HTML = \{.*?\};</script>', '', s, flags=re.DOTALL)
+        
+    h_dash_clean = strip_all_screens(h_dash_live)
+    h_fc_clean = strip_all_screens(h_fc_live)
+    h_cvrp_clean = strip_all_screens(h_cvrp_live)
     
-    # Render with clean height and no double radio headers
-    final_spa_code = re.sub(r'<script>window\.ALL_SCREENS_HTML = \{.*?\};</script>', '', h_dash_live, flags=re.DOTALL)
-    final_spa_code = final_spa_code.replace('<head>', '<head>' + live_screens_js, 1)
+    live_screens_dict = {
+        "dashboard_preview.html": h_dash_clean,
+        "demand_forecaster.html": h_fc_clean,
+        "cvrp_explorer.html": h_cvrp_clean,
+        "index.html": h_dash_clean
+    }
+    live_screens_js = '<script>window.ALL_SCREENS_HTML = ' + json.dumps(live_screens_dict) + ';</script>'
+    
+    final_spa_code = h_dash_clean.replace('<head>', '<head>' + live_screens_js, 1)
     
     components.html(final_spa_code, height=980, scrolling=False)
 
