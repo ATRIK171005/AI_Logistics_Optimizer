@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 import json
+import re
 import database
 import optimizer
 import forecaster
