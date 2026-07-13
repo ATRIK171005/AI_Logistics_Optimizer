@@ -68,10 +68,12 @@ Let $W$ be regional hubs, $C$ be inland destinations.
 
 ---
 
-### 2. Capacitated Vehicle Routing Problem (CVRP) Delivery Module (`vrp_solver.py`)
-Addresses physical local distribution (`Depot ➔ Stop A ➔ Stop B ➔ Depot`) for fleets:
-- Uses `pywrapcp.RoutingModel` with `PATH_CHEAPEST_ARC` first-solution strategy and `GUIDED_LOCAL_SEARCH` metaheuristics.
-- Computes exact multi-stop itineraries ($O(V!)$ search space reduced via constraint propagation).
+### 2. Vehicle Routing Problem with Time Windows (VRPTW) Delivery Module (`vrp_solver.py`)
+Addresses physical FTL/LTL local and regional distribution (`Depot ➔ Customer A [09:00 - 11:00 AM] ➔ Customer B [11:30 AM - 02:00 PM] ➔ Depot`) for enterprise trucking fleets:
+- Uses `pywrapcp.RoutingModel` with dual-dimension constraints:
+  - **`Capacity` Dimension (`AddDimensionWithVehicleCapacity`)**: Tracks TEU demand accumulation per truck to ensure no vehicle exceeds its structural weight/volume limit.
+  - **`Time` Dimension (`AddDimension`)**: Evaluates transit durations + service unloading times (e.g., 30 min per dock) and strictly enforces exact customer delivery time windows $[e_i, l_i]$ (`.SetRange(e_i, l_i)`).
+- Employs `PATH_CHEAPEST_ARC` first-solution strategy and `GUIDED_LOCAL_SEARCH` metaheuristics with simulated annealing / Tabu search escapes to find near-global optimal routes, eliminating deadhead mileage and customer dock bottlenecks.
 
 ---
 

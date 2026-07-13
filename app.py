@@ -488,45 +488,59 @@ with tab_viz:
 # TAB 4: VEHICLE ROUTING PROBLEM (VRP)
 # ---------------------------------------------------------
 with tab_vrp:
-    st.markdown("### 🚛 Capacitated Vehicle Routing Problem (CVRP) Delivery Engine")
-    st.write("While the **MILP Allocation Engine** determines *how many* TEUs to ship between regional hubs, the **VRP Delivery Engine** uses **Google OR-Tools (`RoutingModel` with Guided Local Search)** to schedule exact multi-stop delivery loops (`Depot ➔ Stop A ➔ Stop B ➔ Depot`) for local truck fleets.")
+    st.markdown("### 🚛 Vehicle Routing Problem with Time Windows (VRPTW) Engine for FTL/LTL Logistics")
+    st.write("While the **MILP Allocation Engine** solves pure multi-origin network flow allocation without stop ordering, our **VRPTW Delivery Engine** uses **Google OR-Tools (`pywrapcp.RoutingModel` with Guided Local Search)** to schedule exact multi-stop delivery loops (`Depot ➔ Customer A [09:00 - 11:00 AM] ➔ Customer B [11:30 AM - 02:00 PM] ➔ Depot`) for regional FTL/LTL trucking fleets while strictly respecting **both** truck capacity limits (`AddDimensionWithVehicleCapacity`) and strict customer delivery time windows (`AddDimension`).")
     
     col_vrp_ctrl, col_vrp_res = st.columns([1.3, 2.7])
     with col_vrp_ctrl:
-        st.markdown("#### ⚙️ Local Depot Routing Setup")
+        st.markdown("#### ⚙️ Regional VRPTW Routing Setup")
         selected_depot = st.selectbox("Select Origin Hub Depot:", warehouses_df["Warehouse"].tolist())
         num_vrp_trucks = st.slider("Available Local Delivery Trucks:", min_value=1, max_value=5, value=3)
         vrp_truck_cap = st.slider("Truck TEU Carrying Limit:", min_value=200, max_value=600, value=450, step=50)
+        vrp_speed_kmh = st.slider("Average Fleet Transit Speed (km/h):", min_value=30.0, max_value=90.0, value=60.0, step=5.0)
         
-        run_vrp = st.button("🚀 Schedule Multi-Stop Routes", key="run_vrp_btn")
+        run_vrp = st.button("🚀 Schedule VRPTW Time-Window Routes", key="run_vrp_btn")
+        
+        st.markdown("""
+            <div style="background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 8px; padding: 12px; margin-top: 15px; font-size: 0.82rem; color: #DCE4E5;">
+                <b style="color: #00E5FF;">💡 Why VRPTW vs Pure LP?</b><br>
+                Pure LP (`SCIP`) assigns volume across routes but ignores stop sequencing and delivery schedules. <b>VRPTW (`RoutingModel`)</b> solves the NP-Hard sequential dispatch problem: eliminating deadhead mileage and avoiding customer dock bottlenecks by enforcing dual-dimension tracking (`Capacity` + `Time`).
+            </div>
+        """, unsafe_allow_html=True)
     
     with col_vrp_res:
         if run_vrp:
-            with st.spinner(f"Computing near-global optimal multi-stop routes from '{selected_depot}' using Guided Local Search..."):
+            with st.spinner(f"Computing near-global optimal VRPTW time-window compliant routes from '{selected_depot}' using Guided Local Search..."):
                 vrp_result = vrp_solver.run_sample_vrp(
                     depot_name=selected_depot,
                     customers_df=active_customers_df,
                     num_vehicles=num_vrp_trucks,
-                    vehicle_capacity=vrp_truck_cap
+                    vehicle_capacity=vrp_truck_cap,
+                    vehicle_speed_kmh=vrp_speed_kmh
                 )
                 
             if vrp_result.get("status") == "OPTIMAL":
-                st.success(f"✅ VRP Routes Scheduled successfully for Depot **{selected_depot}**!")
+                st.success(f"✅ VRPTW Multi-Stop Routes Scheduled successfully for Depot **{selected_depot}** with 100% Time-Window Compliance!")
                 
-                v_kpi1, v_kpi2, v_kpi3 = st.columns(3)
+                v_kpi1, v_kpi2, v_kpi3, v_kpi4 = st.columns(4)
                 with v_kpi1:
                     st.metric("Active Delivery Trucks", f"{vrp_result['active_trucks_count']} / {num_vrp_trucks} Trucks")
                 with v_kpi2:
                     st.metric("Total Distance Traveled", f"{vrp_result['total_distance_km']:,} km")
                 with v_kpi3:
                     st.metric("Total TEUs Dropped Off", f"{vrp_result['total_load_delivered']} TEUs")
+                with v_kpi4:
+                    st.metric("Time Window Compliance", f"{vrp_result.get('time_window_adherence_pct', 100.0):.0f}% Adherence")
                 
-                st.markdown("#### 🛣️ Multi-Stop Vehicle Route Itineraries")
+                st.markdown("#### ⏰ Exact Stop-by-Stop Dispatch & Delivery Time Schedule")
+                st.dataframe(vrp_result["schedule_df"], use_container_width=True, hide_index=True)
+
+                st.markdown("#### 🛣️ Fleet Route Itineraries & Utilization Summary")
                 st.dataframe(vrp_result["routes_df"], use_container_width=True, hide_index=True)
             else:
-                st.error(f"❌ {vrp_result.get('message', 'Infeasible routing configuration.')}")
+                st.error(f"❌ {vrp_result.get('message', 'Infeasible VRPTW configuration.')}")
         else:
-            st.info("👈 Select a depot and click **Schedule Multi-Stop Routes** to run the CVRP Routing Library engine.")
+            st.info("👈 Configure your regional hub fleet parameters and click **Schedule VRPTW Time-Window Routes** to execute the OR-Tools dual-dimension (`Capacity` + `Time Windows`) engine.")
 
 # ---------------------------------------------------------
 # TAB 5: SQL PRACTICE SANDBOX & ANALYTICS
