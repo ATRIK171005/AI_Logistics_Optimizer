@@ -163,6 +163,8 @@ if "forecast_df" not in st.session_state:
     st.session_state["forecast_df"] = None
 if "current_sql" not in st.session_state:
     st.session_state["current_sql"] = "SELECT * FROM Warehouses;"
+if "opt_results" not in st.session_state:
+    st.session_state["opt_results"] = None
 
 # Load core tables from SQLite database
 warehouses_df = database.get_table_data("Warehouses")
@@ -191,6 +193,14 @@ with col_title:
             <span style="background: #00243D; padding: 4px 12px; border-radius: 20px; border: 1px solid #00E5FF; font-size: 0.85rem; color: #00E5FF;">{demand_mode_badge}</span>
         </div>
     """, unsafe_allow_html=True)
+
+# Auto-solve SCIP MILP on initial startup so High-Fidelity UI Command Center has live optimal tables immediately
+if st.session_state["opt_results"] is None:
+    opt = optimizer.LogisticsOptimizer(warehouses_df, active_customers_df, cost_df, trucks_df)
+    results = opt.solve()
+    st.session_state["opt_results"] = results
+    if results.get("status") in ["OPTIMAL", "FEASIBLE"]:
+        database.save_shipments(results["shipments_df"])
 
 # Main Navigation Tabs
 tab_mockup, tab_opt, tab_ai, tab_viz, tab_vrp, tab_sql, tab_data = st.tabs([

@@ -351,12 +351,12 @@
     <!-- Row 3: Data Drawer -->
     <div class="glass-panel rounded-xl overflow-hidden">
         <div class="flex border-b border-outline-variant/20 bg-surface-container/30">
-            <button class="px-md py-sm text-sm font-bold text-primary-fixed-dim border-b-2 border-primary-fixed-dim bg-primary-container/5">Active Routes &amp; TEU Allocation</button>
-            <button class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">AI Forecaster Diagnostics</button>
-            <button class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">3NF SQLite Audit Trail</button>
+            <button id="tab-btn-routes" onclick="switchDrawerTab('routes')" class="px-md py-sm text-sm font-bold text-primary-fixed-dim border-b-2 border-primary-fixed-dim bg-primary-container/5 transition-all">Active Routes &amp; TEU Allocation</button>
+            <button id="tab-btn-ai" onclick="switchDrawerTab('ai')" class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">AI Forecaster Diagnostics</button>
+            <button id="tab-btn-sql" onclick="switchDrawerTab('sql')" class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">3NF SQLite Audit Trail</button>
         </div>
         <div class="p-md overflow-x-auto">
-            <table class="w-full text-left border-collapse">
+            <table id="drawer-table-routes" class="w-full text-left border-collapse">
                 <thead>
                 <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20">
                     <th class="pb-sm px-xs font-medium">Route ID</th>
@@ -412,6 +412,117 @@
                 </tr>
                 </tbody>
             </table>
+
+<table id="drawer-table-ai" class="w-full text-left border-collapse" style="display: none;">
+    <thead>
+    <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20">
+        <th class="pb-sm px-xs font-medium">Cluster ID</th>
+        <th class="pb-sm px-xs font-medium">ML Model</th>
+        <th class="pb-sm px-xs font-medium">Horizon</th>
+        <th class="pb-sm px-xs font-medium text-right">RMSE (TEUs)</th>
+        <th class="pb-sm px-xs font-medium text-right">MAE</th>
+        <th class="pb-sm px-xs font-medium text-right">MAPE (%)</th>
+        <th class="pb-sm px-xs font-medium text-right">R² Accuracy</th>
+        <th class="pb-sm px-xs font-medium">Drift Status</th>
+    </tr>
+    </thead>
+    <tbody class="font-mono-label text-[13px]">
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">ROT_NORTH_01</td>
+        <td class="py-sm px-xs">XGBoost-Multi</td>
+        <td class="py-sm px-xs">30 Days</td>
+        <td class="py-sm px-xs text-right">0.99</td>
+        <td class="py-sm px-xs text-right">0.70</td>
+        <td class="py-sm px-xs text-right text-emerald-400">0.35%</td>
+        <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.999</td>
+        <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
+    </tr>
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">MUM_WEST_02</td>
+        <td class="py-sm px-xs">XGBoost-Multi</td>
+        <td class="py-sm px-xs">30 Days</td>
+        <td class="py-sm px-xs text-right">1.24</td>
+        <td class="py-sm px-xs text-right">0.95</td>
+        <td class="py-sm px-xs text-right text-emerald-400">0.82%</td>
+        <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.994</td>
+        <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
+    </tr>
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">SNG_EAST_03</td>
+        <td class="py-sm px-xs">XGBoost-Multi</td>
+        <td class="py-sm px-xs">30 Days</td>
+        <td class="py-sm px-xs text-right">1.12</td>
+        <td class="py-sm px-xs text-right">0.88</td>
+        <td class="py-sm px-xs text-right text-emerald-400">0.61%</td>
+        <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.996</td>
+        <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
+    </tr>
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">AMS_EURO_04</td>
+        <td class="py-sm px-xs">Ensemble-LGBM</td>
+        <td class="py-sm px-xs">30 Days</td>
+        <td class="py-sm px-xs text-right">0.85</td>
+        <td class="py-sm px-xs text-right">0.62</td>
+        <td class="py-sm px-xs text-right text-emerald-400">0.29%</td>
+        <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.999</td>
+        <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
+    </tr>
+    </tbody>
+</table>
+
+
+<table id="drawer-table-sql" class="w-full text-left border-collapse" style="display: none;">
+    <thead>
+    <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20">
+        <th class="pb-sm px-xs font-medium">Audit ID</th>
+        <th class="pb-sm px-xs font-medium">3NF Entity Table</th>
+        <th class="pb-sm px-xs font-medium">Primary Key</th>
+        <th class="pb-sm px-xs font-medium">Mutation Action</th>
+        <th class="pb-sm px-xs font-medium">Constraint Check</th>
+        <th class="pb-sm px-xs font-medium text-right">Latency</th>
+        <th class="pb-sm px-xs font-medium">Sync Timestamp</th>
+    </tr>
+    </thead>
+    <tbody class="font-mono-label text-[13px]">
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99201</td>
+        <td class="py-sm px-xs">Warehouses (3NF)</td>
+        <td class="py-sm px-xs">WarehouseID = 'Hub_A'</td>
+        <td class="py-sm px-xs">UPDATE CapacityTEU -> 2600</td>
+        <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (CHECK > 0)</td>
+        <td class="py-sm px-xs text-right">0.42ms</td>
+        <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:00</td>
+    </tr>
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99202</td>
+        <td class="py-sm px-xs">Customers (3NF)</td>
+        <td class="py-sm px-xs">CustomerID = 'Dest_B'</td>
+        <td class="py-sm px-xs">SYNC MonthlyDemand -> 1000</td>
+        <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (FK Valid)</td>
+        <td class="py-sm px-xs text-right">0.38ms</td>
+        <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:01</td>
+    </tr>
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99203</td>
+        <td class="py-sm px-xs">TransportationCost</td>
+        <td class="py-sm px-xs">RouteKey = 'Hub_A_Dest_B'</td>
+        <td class="py-sm px-xs">CALCULATE UnitCost -> ₹ 500</td>
+        <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (3NF Indexed)</td>
+        <td class="py-sm px-xs text-right">0.51ms</td>
+        <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:02</td>
+    </tr>
+    <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
+        <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99204</td>
+        <td class="py-sm px-xs">Shipments (MILP Res)</td>
+        <td class="py-sm px-xs">ShipmentID = 1010..1014</td>
+        <td class="py-sm px-xs">COMMIT SCIP Optimal Plan</td>
+        <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (ACID Transaction)</td>
+        <td class="py-sm px-xs text-right">1.12ms</td>
+        <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:05</td>
+    </tr>
+    </tbody>
+</table>
+
         </div>
     </div>
 </main>
@@ -420,31 +531,160 @@
     <div class="absolute top-[10%] left-[20%] w-[40rem] h-[40rem] bg-secondary-container/10 blur-[120px] rounded-full animate-pulse"></div>
     <div class="absolute bottom-[5%] right-[10%] w-[30rem] h-[30rem] bg-primary-container/5 blur-[100px] rounded-full"></div>
 </div>
-<script>
-    // Micro-interactions for KPI values
-    document.querySelectorAll('h3').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            el.style.transform = 'scale(1.05)';
-            el.style.color = '#ffffff';
-        });
-        el.addEventListener('mouseleave', () => {
-            el.style.transform = 'scale(1)';
-            el.style.color = '#00daf3';
-        });
-    });
 
-    // Toggle state for map buttons
-    const mapButtons = document.querySelectorAll('.col-span-12 button');
-    mapButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            mapButtons.forEach(b => {
-                b.classList.remove('bg-primary-container/20', 'text-primary-fixed-dim', 'font-bold', 'border-primary-fixed-dim/40');
-                b.classList.add('bg-surface-variant/40', 'text-on-surface-variant', 'border-outline-variant/30');
-            });
-            btn.classList.add('bg-primary-container/20', 'text-primary-fixed-dim', 'font-bold', 'border-primary-fixed-dim/40');
-            btn.classList.remove('bg-surface-variant/40', 'text-on-surface-variant', 'border-outline-variant/30');
-        });
-    });
+<script>
+    function navigateToScreen(targetScreen) {
+        try {
+            if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[targetScreen]) {
+                document.open();
+                document.write(window.ALL_SCREENS_HTML[targetScreen]);
+                document.close();
+                return;
+            }
+        } catch(e) {}
+
+        try {
+            if (window.parent && window.parent.switchTab && typeof window.parent.switchTab === 'function') {
+                window.parent.switchTab(targetScreen);
+                return;
+            }
+        } catch(e) {}
+
+        try {
+            if (window.parent && window.parent.document) {
+                const labels = window.parent.document.querySelectorAll('div[role="radiogroup"] label, label[data-baseweb="radio"], p, span, div[data-testid="stRadio"] label');
+                if (labels && labels.length > 0) {
+                    for (let label of labels) {
+                        const txt = label.innerText || label.textContent || '';
+                        if (
+                            (targetScreen === 'dashboard_preview.html' && (txt.includes('Network Topology') || txt.includes('Allocation Hub'))) ||
+                            (targetScreen === 'demand_forecaster.html' && (txt.includes('Demand Forecaster') || txt.includes('Macro Simulation'))) ||
+                            (targetScreen === 'cvrp_explorer.html' && (txt.includes('CVRP') || txt.includes('Fleet Dispatch')))
+                        ) {
+                            label.click();
+                            showToast('Switched Screen', 'Navigating to ' + targetScreen);
+                            return;
+                        }
+                    }
+                }
+            }
+        } catch (e) {}
+
+        try {
+            window.location.href = targetScreen;
+        } catch(e) {}
+    }
+
+    function showToast(title, message) {
+        const toast = document.getElementById('toast-notification');
+        if (!toast) return;
+        const titleEl = document.getElementById('toast-title');
+        const msgEl = document.getElementById('toast-msg');
+        if (titleEl) titleEl.innerText = '⚡ ' + title;
+        if (msgEl) msgEl.innerText = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3800);
+    }
+
+    function switchMapMode(mode) {
+        const btns = {'milp': 'btn-map-milp', 'cvrp': 'btn-map-cvrp', 'heat': 'btn-map-heat'};
+        for (let k in btns) {
+            const el = document.getElementById(btns[k]);
+            if (!el) continue;
+            if (k === mode) {
+                el.className = 'bg-primary-container/20 text-primary-fixed-dim text-xs px-xs py-1 rounded border border-primary-fixed-dim/40 font-bold transition-all';
+            } else {
+                el.className = 'bg-surface-variant/40 hover:bg-surface-variant/60 text-xs px-xs py-1 rounded border border-outline-variant/30 text-on-surface-variant transition-all';
+            }
+        }
+        
+        const gMilp = document.getElementById('map-group-milp');
+        const gCvrp = document.getElementById('map-group-cvrp');
+        const gHeat = document.getElementById('map-group-heat');
+        if (gMilp) gMilp.classList.add('hidden');
+        if (gCvrp) gCvrp.classList.add('hidden');
+        if (gHeat) gHeat.classList.add('hidden');
+        
+        const target = document.getElementById('map-group-' + mode);
+        if (target) target.classList.remove('hidden');
+
+        showToast('Map Mode Switched', 'Displaying active ' + mode.toUpperCase() + ' network layer.');
+    }
+
+    function switchDrawerTab(tabName) {
+        const tabs = {'routes': 'tab-btn-routes', 'ai': 'tab-btn-ai', 'sql': 'tab-btn-sql'};
+        const contents = {'routes': 'drawer-table-routes', 'ai': 'drawer-table-ai', 'sql': 'drawer-table-sql'};
+        
+        for (let k in tabs) {
+            const btn = document.getElementById(tabs[k]);
+            if (btn) {
+                if (k === tabName) {
+                    btn.className = 'px-md py-sm text-sm font-bold text-primary-fixed-dim border-b-2 border-primary-fixed-dim bg-primary-container/5 transition-all';
+                } else {
+                    btn.className = 'px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all';
+                }
+            }
+            const tbl = document.getElementById(contents[k]);
+            if (tbl) {
+                if (k === tabName) {
+                    tbl.style.display = 'table';
+                } else {
+                    tbl.style.display = 'none';
+                }
+            }
+        }
+        showToast('Data Drawer Switched', 'Inspecting ' + tabName.toUpperCase() + ' live database view.');
+    }
+
+    function openNewOptimizationModal() {
+        const modal = document.getElementById('new-opt-modal');
+        if (modal) {
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            const inner = modal.querySelector('.max-w-lg');
+            if (inner) inner.classList.remove('scale-95');
+        }
+    }
+
+    function closeNewOptimizationModal() {
+        const modal = document.getElementById('new-opt-modal');
+        if (modal) {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            const inner = modal.querySelector('.max-w-lg');
+            if (inner) inner.classList.add('scale-95');
+        }
+    }
+
+    function executeNewOptimizationRun() {
+        const btn = document.getElementById('btn-modal-execute');
+        const eng = document.getElementById('modal-engine-select')?.value || 'milp';
+        if (btn) {
+            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Computing Global Optimum...';
+            btn.disabled = true;
+        }
+
+        setTimeout(() => {
+            closeNewOptimizationModal();
+            if (btn) {
+                btn.innerHTML = '<span class="material-symbols-outlined text-sm">bolt</span> Execute Custom Solver →';
+                btn.disabled = false;
+            }
+            if (eng === 'milp') {
+                showToast('SCIP MILP Converged', 'Custom network hub allocation solved in 14.8ms. Freight cost: $1,098,400 | Savings: 68.2%');
+            } else if (eng === 'xgb') {
+                showToast('XGBoost Multi-Horizon Retrained', 'Custom 30-day forecast generated across Rotterdam Hub cluster (`R² = 0.982`).');
+            } else {
+                showToast('OR-Tools GLS Dispatched', 'Custom multi-stop loops scheduled for Rotterdam Depot across 16 active EV trucks.');
+            }
+        }, 800);
+    }
+
+    function runGlobalOptimization() {
+        showToast('Solvers Re-Dispatched', 'Running SCIP MILP exact allocation across all 36 global freight corridors...');
+        setTimeout(() => {
+            showToast('SCIP MILP Converged', 'Total freight cost optimized to ₹ 6,600. Savings vs Baseline: 66.6%!');
+        }, 1200);
+    }
 </script>
+
 </body>
 </html>
