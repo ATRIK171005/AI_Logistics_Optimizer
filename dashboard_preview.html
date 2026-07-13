@@ -3,843 +3,785 @@
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>AI Logistics Network Optimizer | Command Center</title>
+    <title>Obsidian Hearth — Strategic Operations Console</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
     <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
         body {
-            background-color: #000F1C;
-            color: #dce4e5;
+            background-color: #051424;
+            color: #d4e4fa;
+            font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
-            font-family: 'Outfit', sans-serif;
         }
 
-        .glass-panel {
-            background: rgba(0, 36, 61, 0.45);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 229, 255, 0.2);
-            transition: all 0.3s ease;
+        .matte-card {
+            background-color: #181B22;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
+            position: relative;
         }
 
-        .glass-panel:hover {
-            border-color: rgba(0, 229, 255, 0.6);
-            box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+        .matte-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
         }
 
-        .glow-cyan {
-            text-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
+        .glow-ambient {
+            filter: blur(80px);
+            opacity: 0.15;
+            pointer-events: none;
         }
 
-        .solver-progress {
-            height: 2px;
-            background: linear-gradient(90deg, #003061 0%, #00e5ff 50%, #003061 100%);
-            background-size: 200% 100%;
-            animation: scanning 2s linear infinite;
-        }
-
-        @keyframes scanning {
-            0% { background-position: 100% 0%; }
-            100% { background-position: -100% 0%; }
-        }
-
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #0d1516;
+            background: #051424;
         }
         ::-webkit-scrollbar-thumb {
-            background: #3b494c;
+            background: #273647;
             border-radius: 10px;
         }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #00daf3;
+
+        .switch-toggle:checked + .switch-dot {
+            transform: translateX(100%);
+            background-color: #81B29A;
         }
 
-        #toast-notification {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
-            transform: translateY(150%);
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Scanning Grid & Neon Map Effects */
+        .scanning-grid {
+            background-image: linear-gradient(to right, rgba(0, 229, 255, 0.06) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 229, 255, 0.06) 1px, transparent 1px);
+            background-size: 30px 30px;
         }
-        #toast-notification.show {
+
+        @keyframes scan-line {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(400px); }
+        }
+        .scan-beam {
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, transparent, #00E5FF, transparent);
+            box-shadow: 0 0 15px #00E5FF;
+            animation: scan-line 6s linear infinite;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        @keyframes pulse-node {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 20px #00E5FF; }
+        }
+        .node-pulse {
+            animation: pulse-node 2.5s infinite ease-in-out;
+        }
+
+        /* Toast notification */
+        #toast-box {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(150%);
+            opacity: 0;
+        }
+        #toast-box.show {
             transform: translateY(0);
+            opacity: 1;
         }
     </style>
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    "colors": {
-                        "on-primary-fixed-variant": "#004f58",
-                        "on-tertiary-fixed-variant": "#594400",
-                        "on-primary": "#00363d",
-                        "error-container": "#93000a",
-                        "inverse-on-surface": "#2a3233",
-                        "primary-container": "#00e5ff",
-                        "surface-variant": "#2e3638",
-                        "surface-bright": "#333a3c",
-                        "primary-fixed": "#9cf0ff",
-                        "on-tertiary": "#3e2e00",
-                        "outline": "#849396",
-                        "on-primary-fixed": "#001f24",
-                        "on-secondary": "#003061",
-                        "on-tertiary-container": "#6f5500",
-                        "surface-container-highest": "#2e3638",
-                        "tertiary-fixed-dim": "#f3bf26",
-                        "on-error-container": "#ffdad6",
-                        "tertiary": "#ffeac0",
-                        "primary": "#c3f5ff",
-                        "secondary": "#a8c8ff",
-                        "inverse-surface": "#dce4e5",
-                        "surface-container": "#192122",
-                        "background": "#0d1516",
-                        "on-surface": "#dce4e5",
-                        "outline-variant": "#3b494c",
-                        "surface-container-lowest": "#080f11",
-                        "tertiary-container": "#fec931",
-                        "surface-dim": "#0d1516",
-                        "secondary-container": "#3491ff",
-                        "tertiary-fixed": "#ffdf96",
-                        "error": "#ffb4ab",
-                        "on-tertiary-fixed": "#251a00",
-                        "secondary-fixed-dim": "#a8c8ff",
-                        "on-secondary-fixed": "#001b3c",
-                        "on-primary-container": "#00626e",
-                        "surface": "#0d1516",
-                        "on-surface-variant": "#bac9cc",
-                        "surface-container-high": "#242b2d",
-                        "on-secondary-fixed-variant": "#004689",
-                        "secondary-fixed": "#d5e3ff",
-                        "surface-container-low": "#151d1e",
-                        "surface-tint": "#00daf3",
-                        "on-background": "#dce4e5",
-                        "on-error": "#690005",
-                        "primary-fixed-dim": "#00daf3",
-                        "on-secondary-container": "#002955",
-                        "inverse-primary": "#006875"
-                    },
-                    "borderRadius": {
-                        "DEFAULT": "0.125rem",
-                        "lg": "0.25rem",
-                        "xl": "0.5rem",
-                        "full": "0.75rem"
-                    },
-                    "spacing": {
-                        "margin_mobile": "16px",
-                        "base": "4px",
-                        "sm": "16px",
-                        "grid_columns": "12",
-                        "margin_desktop": "48px",
-                        "md": "24px",
-                        "gutter": "20px",
-                        "xs": "8px",
-                        "xl": "64px",
-                        "lg": "40px"
-                    },
-                    "fontFamily": {
-                        "mono-label": ["JetBrains Mono"],
-                        "body-md": ["Outfit"],
-                        "headline-md-mobile": ["Outfit"],
-                        "display-lg": ["Outfit"],
-                        "headline-md": ["Outfit"],
-                        "mono-kpi": ["JetBrains Mono"],
-                        "body-lg": ["Outfit"]
-                    },
-                    "fontSize": {
-                        "mono-label": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
-                        "body-md": ["15px", {"lineHeight": "22px", "fontWeight": "400"}],
-                        "headline-md-mobile": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
-                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
-                        "headline-md": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
-                        "mono-kpi": ["20px", {"lineHeight": "24px", "letterSpacing": "0.05em", "fontWeight": "500"}],
-                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
-                    }
-                },
-            },
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-secondary-container": "#8ec0a7",
+                      "on-primary-fixed-variant": "#7c2e19",
+                      "tertiary-fixed": "#ffdeab",
+                      "surface-tint": "#ffb4a1",
+                      "on-error-container": "#ffdad6",
+                      "secondary-fixed-dim": "#9fd1b8",
+                      "surface": "#051424",
+                      "secondary": "#9fd1b8",
+                      "primary-fixed": "#ffdbd2",
+                      "surface-bright": "#2c3a4c",
+                      "on-tertiary-container": "#402b00",
+                      "on-tertiary": "#422c00",
+                      "surface-container-high": "#1c2b3c",
+                      "on-secondary": "#023826",
+                      "surface-container": "#122131",
+                      "error": "#ffb4ab",
+                      "on-surface": "#d4e4fa",
+                      "tertiary-fixed-dim": "#e6c185",
+                      "on-surface-variant": "#dbc1ba",
+                      "on-background": "#d4e4fa",
+                      "on-tertiary-fixed-variant": "#5c4212",
+                      "primary-fixed-dim": "#ffb4a1",
+                      "surface-container-highest": "#273647",
+                      "primary": "#ffb4a1",
+                      "background": "#051424",
+                      "outline-variant": "#55423e",
+                      "secondary-fixed": "#bbeed4",
+                      "on-secondary-fixed-variant": "#1f4f3c",
+                      "tertiary": "#e6c185",
+                      "on-primary": "#5d1805",
+                      "secondary-container": "#1f4f3c",
+                      "surface-dim": "#051424",
+                      "error-container": "#93000a",
+                      "on-tertiary-fixed": "#271900",
+                      "inverse-surface": "#d4e4fa",
+                      "on-primary-fixed": "#3c0800",
+                      "inverse-on-surface": "#233143",
+                      "surface-container-lowest": "#010f1f",
+                      "outline": "#a38b86",
+                      "surface-container-low": "#0d1c2d",
+                      "primary-container": "#e07a5f",
+                      "on-secondary-fixed": "#002115",
+                      "surface-variant": "#273647",
+                      "tertiary-container": "#b3915a",
+                      "on-primary-container": "#5b1604",
+                      "on-error": "#690005",
+                      "inverse-primary": "#9a442d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "sm": "12px",
+                      "lg": "48px",
+                      "container-max": "1280px",
+                      "md": "24px",
+                      "base": "8px",
+                      "xl": "80px",
+                      "gutter": "24px",
+                      "xs": "4px"
+              }
+            }
+          }
         }
     </script>
 </head>
-<body class="bg-background text-on-surface">
-<!-- TopNavBar -->
-<nav class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-md py-xs bg-background/45 backdrop-blur-md border-b border-outline-variant/20 shadow-sm transition-all duration-300 ease-in-out">
-    <div class="flex items-center gap-sm">
-        <span class="font-headline-md text-headline-md font-bold text-primary-fixed-dim">⚓ AI Logistics Network Optimizer</span>
-    </div>
-    <div class="hidden md:flex gap-md items-center">
-        <a class="text-on-surface-variant hover:text-primary-fixed hover:bg-surface-variant/30 font-body-md text-body-md px-xs py-1 transition-all" href="#">Maersk Enterprise Hub</a>
-        <a class="text-primary-fixed-dim font-bold border-b-2 border-primary-fixed-dim font-body-md text-body-md px-xs py-1 transition-all" href="#">🟢 MILP &amp; CVRP Solvers Online</a>
-        <button onclick="openNewOptimizationModal(); return false;" class="bg-primary-container text-on-primary-container px-sm py-xs rounded-lg font-bold hover:scale-105 transition-transform">Run Optimization Engine</button>
-    </div>
-</nav>
+<body class="bg-surface text-on-surface selection:bg-primary/30">
+<!-- Ambient Glow Background Effects -->
+<div class="fixed inset-0 overflow-hidden -z-10 pointer-events-none">
+    <div class="glow-ambient absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-primary rounded-full"></div>
+    <div class="glow-ambient absolute bottom-[-5%] left-[10%] w-[500px] h-[500px] bg-secondary rounded-full"></div>
+    <div class="glow-ambient absolute top-[40%] left-[-5%] w-[400px] h-[400px] bg-tertiary rounded-full"></div>
+</div>
 
-<!-- SideNavBar -->
-<aside class="fixed left-0 top-0 h-full w-64 bg-surface-container/45 backdrop-blur-xl border-r border-outline-variant/20 shadow-lg flex flex-col pt-20 transition-all duration-200 z-40">
-    <div class="px-md mb-lg">
-        <div class="flex items-center gap-xs mb-xs">
-            <div class="w-10 h-10 rounded-full border border-primary-fixed-dim overflow-hidden">
-                <img class="w-full h-full object-cover" data-alt="A professional profile portrait of a logistics director in a high-tech naval operations center. The lighting is low-key with cool blue ambient tones reflecting off glass surfaces. The style is sharp, cinematic, and authoritative, matching a futuristic command center aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDTpHqSHrzndrG9qILFlGIm8P8w17DEa5ZRikg4JAbw8RFdOOR8kXrz0TjeT8492tnmaJhHTO87ThJcqiBwGYGUvgr0l-J8FwccWaw7X_O-DQC8PCbyP8dSwz2f00-pf_2v7ZdCOyjlVIpwnyJI7X-zYZ1WvB1_wQRYtJdx18DXOsY7Cp5hRgj_qpVxb9JWiYa9zssir75Kwx3zwGqZjoSaMAZ7pnxyxRwezmjyvqP_NMx5fSKmdixn"/>
-            </div>
-            <div>
-                <p class="font-mono-kpi text-mono-kpi text-primary-fixed-dim leading-none font-bold">Command Center</p>
-                <p class="text-xs text-on-surface-variant">Precision Logistics</p>
-            </div>
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/5 flex justify-between items-center px-lg h-20">
+    <div class="flex items-center gap-md">
+        <div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container shadow-lg shadow-primary/20">
+            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
         </div>
-        <button onclick="openNewOptimizationModal(); return false;" class="w-full bg-primary-container/10 border border-primary-container/30 text-primary-fixed-dim py-xs rounded flex items-center justify-center gap-xs hover:bg-primary-container/20 transition-all mt-md font-bold">
-            <span class="material-symbols-outlined text-sm">add</span>
-            New Optimization
+        <h1 class="text-2xl font-bold text-on-surface tracking-tight">Obsidian Hearth</h1>
+    </div>
+    <nav class="hidden md:flex items-center gap-lg font-medium text-[16px]">
+        <a onclick="switchMainScreen('dashboard_preview.html', 'topology'); return false;" class="text-primary font-bold border-b-2 border-primary pb-1 cursor-pointer transition-colors" href="#">Dashboard</a>
+        <a onclick="switchMainScreen('demand_forecaster.html', 'forecaster'); return false;" class="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" href="#">Projects</a>
+        <a onclick="switchMainScreen('cvrp_explorer.html', 'cvrp'); return false;" class="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" href="#">Analytics</a>
+        <a onclick="showToast('Team Operations', 'Displaying active personnel across 4 regional nodes.'); return false;" class="text-on-surface-variant hover:text-on-surface transition-colors cursor-pointer" href="#">Team</a>
+    </nav>
+    <div class="flex items-center gap-md">
+        <div class="flex items-center bg-surface-container-low px-sm py-xs rounded-full border border-white/5">
+            <span class="material-symbols-outlined text-on-surface-variant px-base">search</span>
+            <input class="bg-transparent border-none focus:ring-0 text-sm placeholder:text-on-surface-variant/50 w-48 focus:outline-none" placeholder="Search operations..." type="text"/>
+        </div>
+        <button onclick="showToast('Notifications', '0 unread critical system alerts.'); return false;" class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/5 transition-all text-on-surface-variant">
+            <span class="material-symbols-outlined">notifications</span>
         </button>
+        <div class="w-10 h-10 rounded-full overflow-hidden border border-white/10">
+            <img class="w-full h-full object-cover" alt="Executive" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop"/>
+        </div>
     </div>
-    <div class="flex-grow">
-        <a onclick="switchMainScreen('dashboard_preview.html', 'topology'); return false;" class="flex items-center px-md py-sm gap-sm text-primary-fixed-dim border-r-2 border-primary-fixed-dim bg-primary-container/10 hover:bg-primary-container/5 transition-all cursor-pointer font-bold" href="#">
-            <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">hub</span>
-            <span class="font-body-md text-body-md">Network Topology</span>
+</header>
+
+<!-- Sidebar -->
+<aside class="fixed left-0 top-20 h-[calc(100vh-80px)] w-64 bg-surface-container-low border-r border-white/5 flex flex-col p-md gap-base z-40">
+    <div class="flex items-center gap-sm px-sm mb-md">
+        <div class="w-8 h-8 rounded-md bg-secondary/20 flex items-center justify-center text-secondary">
+            <span class="material-symbols-outlined text-[18px]">terminal</span>
+        </div>
+        <div>
+            <p class="font-mono text-[13px] font-bold text-on-surface">System Console</p>
+            <p class="text-[10px] text-on-surface-variant opacity-60">V2.4.0-Stable</p>
+        </div>
+    </div>
+    <nav class="flex-1 space-y-1">
+        <a onclick="switchMainScreen('dashboard_preview.html', 'topology'); return false;" class="flex items-center gap-sm text-primary font-bold bg-primary-container/10 rounded-lg p-sm transition-all cursor-pointer" href="#">
+            <span class="material-symbols-outlined">grid_view</span>
+            <span class="font-mono text-[13px]">Overview</span>
         </a>
-        <a onclick="switchMainScreen('demand_forecaster.html', 'forecaster'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#">
-            <span class="material-symbols-outlined">trending_up</span>
-            <span class="font-body-md text-body-md">Demand Forecaster</span>
+        <a onclick="switchMainScreen('demand_forecaster.html', 'forecaster'); return false;" class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg p-sm transition-all cursor-pointer" href="#">
+            <span class="material-symbols-outlined">folder_open</span>
+            <span class="font-mono text-[13px]">Resources</span>
         </a>
-        <a onclick="switchMainScreen('cvrp_explorer.html', 'cvrp'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#">
-            <span class="material-symbols-outlined">local_shipping</span>
-            <span class="font-body-md text-body-md">CVRP Dispatcher</span>
+        <a onclick="switchMainScreen('cvrp_explorer.html', 'cvrp'); return false;" class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg p-sm transition-all cursor-pointer" href="#">
+            <span class="material-symbols-outlined">insights</span>
+            <span class="font-mono text-[13px]">System Health</span>
         </a>
-        <a onclick="switchMainScreen('dashboard_preview.html', 'cost'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#">
-            <span class="material-symbols-outlined">analytics</span>
-            <span class="font-body-md text-body-md">Cost Analytics</span>
-        </a>
-        <a onclick="switchMainScreen('dashboard_preview.html', 'audit'); return false;" class="flex items-center px-md py-sm gap-sm text-on-surface-variant hover:bg-primary-container/5 hover:text-primary-fixed transition-all cursor-pointer" href="#">
+        <a onclick="switchDrawerTab('logs'); return false;" class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg p-sm transition-all cursor-pointer" href="#">
             <span class="material-symbols-outlined">history</span>
-            <span class="font-body-md text-body-md">Audit Logs</span>
+            <span class="font-mono text-[13px]">Archives</span>
         </a>
-    </div>
-    <div class="p-md border-t border-outline-variant/10">
-        <a onclick="showToast('Settings Panel', 'Maersk Enterprise Hub global settings loaded.'); return false;" class="flex items-center py-xs gap-sm text-on-surface-variant hover:text-primary-fixed transition-all cursor-pointer" href="#">
-            <span class="material-symbols-outlined">settings</span>
-            <span class="text-sm">Settings</span>
+        <a onclick="showToast('Operations Support', 'Connected to Maersk Logistics AI Engine desk.'); return false;" class="flex items-center gap-sm text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-lg p-sm transition-all cursor-pointer" href="#">
+            <span class="material-symbols-outlined">help_outline</span>
+            <span class="font-mono text-[13px]">Support</span>
         </a>
-        <a onclick="showToast('Enterprise Support', 'Dedicated 24/7 Operations Research desk: support@maersk-ai.com'); return false;" class="flex items-center py-xs gap-sm text-on-surface-variant hover:text-primary-fixed transition-all cursor-pointer" href="#">
-            <span class="material-symbols-outlined">help</span>
-            <span class="text-sm">Support</span>
-        </a>
+    </nav>
+    <div class="mt-auto border-t border-white/5 pt-md">
+        <button onclick="showToast('Upgrade Plan', 'Maersk Enterprise tier already active.'); return false;" class="w-full bg-primary-container hover:bg-primary-container/90 text-on-primary-container font-semibold py-sm rounded-lg flex items-center justify-center gap-base active:scale-[0.98] transition-all">
+            <span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+            <span class="font-mono text-[13px]">Upgrade Plan</span>
+        </button>
+        <button onclick="showToast('Sign Out', 'Session securely locked to active workspace.'); return false;" class="w-full flex items-center justify-center gap-sm text-on-surface-variant hover:text-error mt-sm p-sm transition-all">
+            <span class="material-symbols-outlined">logout</span>
+            <span class="font-mono text-[13px]">Sign Out</span>
+        </button>
     </div>
 </aside>
 
-<!-- Main Workspace -->
-<main class="ml-64 pt-24 px-lg pb-lg">
-    <!-- Row 1: KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-md mb-lg">
-        <!-- KPI 1 -->
-        <div class="glass-panel p-md rounded-xl relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full solver-progress opacity-40"></div>
-            <p class="text-on-surface-variant text-xs uppercase tracking-widest mb-xs">Network Cost</p>
-            <h3 class="font-mono-kpi text-mono-kpi text-primary-fixed-dim">$1,425,800</h3>
-            <div class="flex items-center gap-xs mt-xs">
-                <span class="text-emerald-400 text-sm font-bold">▼ 66.6%</span>
-                <span class="text-on-surface-variant text-xs">Optimized vs Baseline</span>
+<!-- Main Content Area -->
+<main class="ml-64 pt-20 p-lg min-h-screen">
+    <!-- KPI Row -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter mb-xl">
+        <div class="matte-card p-md rounded-xl flex flex-col gap-xs">
+            <div class="flex justify-between items-start">
+                <span class="text-on-surface-variant font-mono text-[11px] tracking-wider uppercase">Network Health</span>
+                <span class="text-secondary material-symbols-outlined text-[20px]">sensors</span>
+            </div>
+            <div class="flex items-baseline gap-base mt-base">
+                <span class="text-[32px] font-bold text-on-surface leading-tight">98.4% R² Score</span>
+                <span class="text-secondary font-mono text-[11px]">+0.2%</span>
+            </div>
+            <div class="w-full h-1 bg-surface-container-highest rounded-full mt-sm overflow-hidden">
+                <div class="h-full bg-secondary w-[98.4%]"></div>
             </div>
         </div>
-        <!-- KPI 2 -->
-        <div class="glass-panel p-md rounded-xl">
-            <p class="text-on-surface-variant text-xs uppercase tracking-widest mb-xs">Intermodal Corridors</p>
-            <h3 class="font-mono-kpi text-mono-kpi text-primary-fixed-dim">24 / 36 Routes</h3>
-            <div class="mt-xs inline-flex items-center px-2 py-0.5 rounded bg-primary-fixed-dim/20 text-primary-fixed-dim text-[10px] font-bold border border-primary-fixed-dim/30">
-                MILP EXACT SOLUTION
+        <div class="matte-card p-md rounded-xl flex flex-col gap-xs">
+            <div class="flex justify-between items-start">
+                <span class="text-on-surface-variant font-mono text-[11px] tracking-wider uppercase">Active Nodes</span>
+                <span class="text-tertiary material-symbols-outlined text-[20px]">hub</span>
+            </div>
+            <div class="flex items-baseline gap-base mt-base">
+                <span class="text-[32px] font-bold text-on-surface leading-tight">24 / 36 Routes</span>
+                <span class="text-tertiary font-mono text-[11px]">Stable</span>
+            </div>
+            <div class="flex gap-1 mt-sm">
+                <div class="h-1 flex-1 bg-tertiary rounded-full"></div>
+                <div class="h-1 flex-1 bg-tertiary rounded-full"></div>
+                <div class="h-1 flex-1 bg-tertiary/30 rounded-full"></div>
+                <div class="h-1 flex-1 bg-tertiary/30 rounded-full"></div>
             </div>
         </div>
-        <!-- KPI 3 -->
-        <div class="glass-panel p-md rounded-xl">
-            <p class="text-on-surface-variant text-xs uppercase tracking-widest mb-xs">Forecaster Accuracy</p>
-            <h3 class="font-mono-kpi text-mono-kpi text-primary-fixed-dim">98.4% R² Score</h3>
-            <p class="text-on-surface-variant text-xs mt-xs">RMSE: 12.4 TEUs</p>
+        <div class="matte-card p-md rounded-xl flex flex-col gap-xs">
+            <div class="flex justify-between items-start">
+                <span class="text-on-surface-variant font-mono text-[11px] tracking-wider uppercase">Operational Efficiency</span>
+                <span class="text-primary material-symbols-outlined text-[20px]">bolt</span>
+            </div>
+            <div class="flex items-baseline gap-base mt-base">
+                <span class="text-[32px] font-bold text-on-surface leading-tight">94.2% Capacity</span>
+                <span class="text-primary font-mono text-[11px]">+4%</span>
+            </div>
+            <div class="w-full h-1 bg-surface-container-highest rounded-full mt-sm overflow-hidden">
+                <div class="h-full bg-primary w-[94.2%]"></div>
+            </div>
         </div>
-        <!-- KPI 4 -->
-        <div class="glass-panel p-md rounded-xl">
-            <p class="text-on-surface-variant text-xs uppercase tracking-widest mb-xs">Fleet Utilization</p>
-            <h3 class="font-mono-kpi text-mono-kpi text-primary-fixed-dim">94.2% Capacity</h3>
-            <p class="text-on-surface-variant text-xs mt-xs">18 Discrete Truck Trips</p>
+        <div class="matte-card p-md rounded-xl flex flex-col gap-xs">
+            <div class="flex justify-between items-start">
+                <span class="text-on-surface-variant font-mono text-[11px] tracking-wider uppercase">Daily Throughput</span>
+                <span class="text-on-secondary-container material-symbols-outlined text-[20px]">database</span>
+            </div>
+            <div class="flex items-baseline gap-base mt-base">
+                <span class="text-[32px] font-bold text-on-surface leading-tight">$1,425,800</span>
+                <span class="text-on-secondary-container font-mono text-[11px]">18 Discrete Truck Trips</span>
+            </div>
+            <div class="mt-sm space-y-1">
+                <div class="flex justify-between font-mono text-[11px] text-on-surface-variant opacity-70">
+                    <span>Baseline Cost</span>
+                    <span class="line-through text-error">$1,980,000</span>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- Row 2: Grid Split -->
-    <div class="grid grid-cols-12 gap-md mb-lg">
-        <!-- Left: Route Map -->
-        <div class="col-span-12 lg:col-span-8 glass-panel rounded-xl p-md flex flex-col h-[500px]">
-            <div class="flex justify-between items-center mb-md">
-                <h2 class="font-headline-md text-body-lg font-bold text-primary">Network Topology &amp; Route Map</h2>
-                <div class="flex gap-xs">
-                    <button id="btn-map-milp" onclick="switchMapMode('milp')" class="bg-primary-container/20 text-primary-fixed-dim text-xs px-xs py-1 rounded border border-primary-fixed-dim/40 font-bold">MILP Hub Allocation</button>
-                    <button id="btn-map-cvrp" onclick="switchMapMode('cvrp')" class="bg-surface-variant/40 hover:bg-surface-variant/60 text-xs px-xs py-1 rounded border border-outline-variant/30 text-on-surface-variant">CVRP Multi-Stop</button>
-                    <button id="btn-map-heat" onclick="switchMapMode('heat')" class="bg-surface-variant/40 hover:bg-surface-variant/60 text-xs px-xs py-1 rounded border border-outline-variant/30 text-on-surface-variant">Demand Heatmap</button>
+    <!-- Central Layout: Workspace + Controls -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-xl h-[600px]">
+        <!-- Strategic Overview (Map/Viz) -->
+        <div class="lg:col-span-9 matte-card rounded-2xl overflow-hidden flex flex-col">
+            <div class="p-md border-b border-white/5 flex justify-between items-center bg-white/2">
+                <div class="flex items-center gap-sm">
+                    <span class="material-symbols-outlined text-secondary">map</span>
+                    <h2 class="text-[20px] font-bold tracking-tight">Strategic Node Overview</h2>
+                </div>
+                <div class="flex gap-base">
+                    <button onclick="showToast('Map Mode', 'Switched to Real-time SCIP telemetry.'); return false;" class="px-sm py-xs bg-surface-container-highest font-mono text-[12px] rounded-full text-on-surface hover:bg-white/10 transition-all">Real-time</button>
+                    <button onclick="showToast('Map Mode', 'Historical route playback active.'); return false;" class="px-sm py-xs font-mono text-[12px] rounded-full text-on-surface-variant hover:text-on-surface transition-all">Historical</button>
                 </div>
             </div>
-            <div class="flex-grow rounded-lg overflow-hidden relative border border-outline-variant/10 bg-surface-container-lowest/50">
-                <!-- Map Visualization Background -->
-                <div class="absolute inset-0 z-0">
-                    <div class="w-full h-full opacity-30 grayscale contrast-125 bg-cover bg-center" data-alt="A high-contrast dark mode satellite topographical map of a global coastline featuring complex logistics networks. Luminous electric cyan lines and geometric glowing nodes represent transit routes and distribution hubs. The aesthetic is ultra-modern, technical, and data-dense, with a nautical maritime operations vibe." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBLZXa-rmqtzL5D2qzf73dj1xxVv0bfv3aWtC88nHDQFwcX22cD6QWL6V7ZuF6f3Kquuyf94BkECttt_CGCQL67FQVLNJwKi2mdKKoh2Hgn_PF767rFEQEn7fMuBKIBsFUrbLSFjXTqVHH-mxh83YK4shoZAju1Paq-sTOh1iQo0fxOJ4xhBO1CnAgGcetunKdgqf0Ocx9VNf6i_7llqGGJmShizroaE9TAueprXCeyWWS9I2O1Im-J')"></div>
-                </div>
-                <!-- Network Graphics -->
+            
+            <!-- Restored Repository-Native Map Design inside Obsidian Hearth Container -->
+            <div class="flex-1 relative bg-[#040c14] overflow-hidden">
+                <div class="absolute inset-0 bg-cover bg-center opacity-30 pointer-events-none" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1600&auto=format&fit=crop'); filter: contrast(140%) brightness(85%) hue-rotate(180deg);"></div>
+                <div class="absolute inset-0 scanning-grid pointer-events-none"></div>
+                <div class="scan-beam"></div>
+
+                <!-- SVG Network Topology Lines and Nodes -->
                 <svg class="absolute inset-0 w-full h-full z-10" viewbox="0 0 800 400">
+                    <defs>
+                        <linearGradient id="neon-cyan" x1="0%" x2="100%" y1="0%" y2="100%">
+                            <stop offset="0%" stop-color="#00E5FF" stop-opacity="0.9"></stop>
+                            <stop offset="100%" stop-color="#81B29A" stop-opacity="0.9"></stop>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+                        </filter>
+                    </defs>
                     <g id="map-group-milp">
-                        <path class="opacity-60" d="M100,200 Q250,50 400,180" fill="none" stroke="#00e5ff" stroke-dasharray="5,5" stroke-width="1.5">
-                            <animate attributename="stroke-dashoffset" dur="2s" from="20" repeatcount="indefinite" to="0"></animate>
-                        </path>
-                        <path class="opacity-80" d="M400,180 Q550,100 700,250" fill="none" stroke="#00e5ff" stroke-width="2"></path>
-                        <path class="opacity-40" d="M100,200 Q400,350 700,250" fill="none" stroke="#00e5ff" stroke-width="1"></path>
-                        <circle class="animate-pulse shadow-lg" cx="100" cy="200" fill="#00e5ff" r="6"></circle>
-                        <circle cx="400" cy="180" fill="#00e5ff" r="8"></circle>
-                        <circle class="animate-pulse" cx="700" cy="250" fill="#00e5ff" r="6"></circle>
-                        <text fill="#00e5ff" font-family="JetBrains Mono" font-size="10" font-weight="bold" x="90" y="225">HUB_ROTTERDAM</text>
-                        <text fill="#00e5ff" font-family="JetBrains Mono" font-size="10" font-weight="bold" x="380" y="165">LOG_NODE_04</text>
-                        <text fill="#00e5ff" font-family="JetBrains Mono" font-size="10" font-weight="bold" x="680" y="275">DEST_MUMBAI</text>
-                    </g>
-                    <g id="map-group-cvrp" class="hidden">
-                        <path d="M100,200 C200,100 300,300 400,180 C500,60 600,340 700,250" fill="none" stroke="#00daf3" stroke-width="2" stroke-dasharray="8,4">
-                            <animate attributename="stroke-dashoffset" dur="3s" from="40" repeatcount="indefinite" to="0"></animate>
-                        </path>
-                        <circle cx="100" cy="200" fill="#00daf3" r="7"></circle>
-                        <circle cx="250" cy="140" fill="#fec931" r="5"></circle>
-                        <circle cx="400" cy="180" fill="#00daf3" r="7"></circle>
-                        <circle cx="550" cy="220" fill="#fec931" r="5"></circle>
-                        <circle cx="700" cy="250" fill="#00daf3" r="7"></circle>
-                        <text fill="#00daf3" font-family="JetBrains Mono" font-size="11" font-weight="bold" x="120" y="195">DEPOT_ALPHA (EV LOOP)</text>
-                    </g>
-                    <g id="map-group-heat" class="hidden">
-                        <circle cx="400" cy="180" fill="url(#heat-grad)" r="120" opacity="0.6"></circle>
-                        <circle cx="100" cy="200" fill="url(#heat-grad)" r="90" opacity="0.5"></circle>
-                        <circle cx="700" cy="250" fill="url(#heat-grad)" r="100" opacity="0.55"></circle>
-                        <defs>
-                            <radialGradient id="heat-grad">
-                                <stop offset="0%" stop-color="#00e5ff" stop-opacity="0.8"/>
-                                <stop offset="50%" stop-color="#3491ff" stop-opacity="0.4"/>
-                                <stop offset="100%" stop-color="#080f11" stop-opacity="0"/>
-                            </radialGradient>
-                        </defs>
+                        <path d="M 120,130 L 310,180" fill="none" stroke="url(#neon-cyan)" stroke-dasharray="6,4" stroke-width="2.5" opacity="0.85"></path>
+                        <path d="M 310,180 L 490,110" fill="none" stroke="url(#neon-cyan)" stroke-width="3" filter="url(#glow)"></path>
+                        <path d="M 490,110 L 670,230" fill="none" stroke="#ffb4a1" stroke-dasharray="4,4" stroke-width="2.5" opacity="0.85"></path>
+                        <path d="M 310,180 L 380,310" fill="none" stroke="url(#neon-cyan)" stroke-width="2" opacity="0.7"></path>
+
+                        <!-- Hub Nodes -->
+                        <g transform="translate(120,130)" class="cursor-pointer group">
+                            <circle cx="0" cy="0" r="14" fill="rgba(0, 229, 255, 0.2)" class="node-pulse"></circle>
+                            <circle cx="0" cy="0" r="6" fill="#00E5FF" filter="url(#glow)"></circle>
+                            <text x="18" y="4" fill="#d4e4fa" font-family="JetBrains Mono" font-size="11" font-weight="bold">HUB_ROTTERDAM</text>
+                        </g>
+                        <g transform="translate(310,180)" class="cursor-pointer group">
+                            <circle cx="0" cy="0" r="18" fill="rgba(0, 229, 255, 0.25)" class="node-pulse"></circle>
+                            <circle cx="0" cy="0" r="8" fill="#00E5FF" filter="url(#glow)"></circle>
+                            <text x="20" y="-8" fill="#d4e4fa" font-family="JetBrains Mono" font-size="12" font-weight="bold">HUB_HAMBURG (Active)</text>
+                        </g>
+                        <g transform="translate(490,110)" class="cursor-pointer group">
+                            <circle cx="0" cy="0" r="14" fill="rgba(129, 178, 154, 0.25)" class="node-pulse"></circle>
+                            <circle cx="0" cy="0" r="6" fill="#81B29A" filter="url(#glow)"></circle>
+                            <text x="18" y="4" fill="#d4e4fa" font-family="JetBrains Mono" font-size="11" font-weight="bold">HUB_GDANSK</text>
+                        </g>
+                        <g transform="translate(670,230)" class="cursor-pointer group">
+                            <circle cx="0" cy="0" r="14" fill="rgba(255, 180, 161, 0.25)" class="node-pulse"></circle>
+                            <circle cx="0" cy="0" r="6" fill="#ffb4a1" filter="url(#glow)"></circle>
+                            <text x="-130" y="20" fill="#ffb4a1" font-family="JetBrains Mono" font-size="11" font-weight="bold">DEST_WARSAW_EAST</text>
+                        </g>
+                        <g transform="translate(380,310)" class="cursor-pointer group">
+                            <circle cx="0" cy="0" r="12" fill="rgba(0, 229, 255, 0.2)"></circle>
+                            <circle cx="0" cy="0" r="5" fill="#00E5FF"></circle>
+                            <text x="14" y="4" fill="#d4e4fa" font-family="JetBrains Mono" font-size="11">DEST_MUNICH</text>
+                        </g>
                     </g>
                 </svg>
-                <!-- Floating Legend -->
-                <div class="absolute bottom-md right-md glass-panel p-xs rounded border border-primary-fixed-dim/30 z-20">
-                    <div class="flex flex-col gap-1 text-[10px] text-on-surface-variant font-mono-label">
-                        <div class="flex items-center gap-xs"><span class="w-2 h-2 rounded-full bg-primary-fixed-dim"></span> Primary Hub</div>
-                        <div class="flex items-center gap-xs"><span class="w-2 h-0.5 bg-primary-fixed-dim"></span> Active Intermodal</div>
-                        <div class="flex items-center gap-xs"><span class="w-2 h-0.5 border-t border-dashed border-primary-fixed-dim"></span> Predicted Route</div>
+
+                <!-- Overlay UI elements on Map -->
+                <div class="absolute bottom-md left-md p-sm matte-card rounded-lg bg-surface/80 backdrop-blur-md z-20">
+                    <p class="font-mono text-[11px] text-on-surface-variant uppercase mb-xs">Active Region</p>
+                    <p class="text-sm font-bold text-on-surface">North Atlantic Sector 7</p>
+                    <div class="flex items-center gap-base mt-xs">
+                        <div class="w-2 h-2 rounded-full bg-secondary animate-pulse"></div>
+                        <span class="font-mono text-[12px] text-secondary">Synchronized & SCIP Optimal</span>
                     </div>
+                </div>
+                <div class="absolute top-md right-md flex flex-col gap-base z-20">
+                    <button onclick="showToast('Zoom In', 'Map scale increased.'); return false;" class="w-10 h-10 matte-card bg-surface/80 backdrop-blur-md flex items-center justify-center rounded-lg text-on-surface hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">add</span>
+                    </button>
+                    <button onclick="showToast('Zoom Out', 'Map scale decreased.'); return false;" class="w-10 h-10 matte-card bg-surface/80 backdrop-blur-md flex items-center justify-center rounded-lg text-on-surface hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">remove</span>
+                    </button>
+                    <button onclick="showToast('Recenter', 'Centered on Hub Hamburg.'); return false;" class="w-10 h-10 matte-card bg-surface/80 backdrop-blur-md flex items-center justify-center rounded-lg text-on-surface hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined">my_location</span>
+                    </button>
                 </div>
             </div>
         </div>
-        <!-- Right: Controls -->
-        <div class="col-span-12 lg:col-span-4 glass-panel rounded-xl p-md flex flex-col h-[500px]">
-            <h2 class="font-headline-md text-body-lg font-bold text-primary mb-md">Optimization Controls</h2>
-            <div class="space-y-md flex-grow">
-                <!-- Sliders -->
-                <div class="space-y-xs">
-                    <div class="flex justify-between items-center text-xs">
-                        <label class="text-on-surface-variant">Sales Velocity Index</label>
-                        <span class="font-mono-label text-primary-fixed-dim">1.2x</span>
+
+        <!-- Tactile Control Panel -->
+        <div class="lg:col-span-3 matte-card rounded-2xl p-md flex flex-col gap-lg">
+            <div>
+                <h3 class="text-[18px] font-semibold mb-sm">Tactile Controls</h3>
+                <p class="font-mono text-[12px] text-on-surface-variant">Fine-tune system output parameters manually.</p>
+            </div>
+            <!-- Sliders -->
+            <div class="space-y-md">
+                <div class="space-y-sm">
+                    <div class="flex justify-between font-mono text-[12px]">
+                        <label class="text-on-surface">Core Amplitude</label>
+                        <span class="text-secondary font-bold">82%</span>
                     </div>
-                    <input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary-fixed-dim" type="range" min="0.5" max="3.0" step="0.1" value="1.2" oninput="updateSliderValue(this)"/>
+                    <input class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-secondary" type="range" value="82"/>
                 </div>
-                <div class="space-y-xs">
-                    <div class="flex justify-between items-center text-xs">
-                        <label class="text-on-surface-variant">Festival Demand Surge</label>
-                        <span class="font-mono-label text-primary-fixed-dim">42%</span>
+                <div class="space-y-sm">
+                    <div class="flex justify-between font-mono text-[12px]">
+                        <label class="text-on-surface">Neural Density</label>
+                        <span class="text-primary font-bold">45%</span>
                     </div>
-                    <input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary-fixed-dim" type="range" min="0" max="100" value="42" oninput="updateSliderValue(this)"/>
+                    <input class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-primary" type="range" value="45"/>
                 </div>
-                <div class="space-y-xs">
-                    <div class="flex justify-between items-center text-xs">
-                        <label class="text-on-surface-variant">Monsoon Disruption Risk</label>
-                        <span class="font-mono-label text-error">High (7/10)</span>
+                <div class="space-y-sm">
+                    <div class="flex justify-between font-mono text-[12px]">
+                        <label class="text-on-surface">Signal Damping</label>
+                        <span class="text-on-secondary-container font-bold">12ms</span>
                     </div>
-                    <input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-error" type="range" min="1" max="10" value="7" oninput="updateSliderValue(this)"/>
+                    <input class="w-full h-1.5 bg-surface-container-highest rounded-lg appearance-none cursor-pointer accent-on-secondary-container" max="100" type="range" value="12"/>
                 </div>
-                <div class="space-y-xs">
-                    <div class="flex justify-between items-center text-xs">
-                        <label class="text-on-surface-variant">Promo Sensitivity Factor</label>
-                        <span class="font-mono-label text-primary-fixed-dim">0.85</span>
-                    </div>
-                    <input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary-fixed-dim" type="range" min="0.1" max="1.0" step="0.05" value="0.85" oninput="updateSliderValue(this)"/>
+            </div>
+            <!-- Toggle Switches -->
+            <div class="space-y-md border-t border-white/5 pt-md">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-[13px] text-on-surface">Autonomous Healing</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input checked="" class="sr-only peer" type="checkbox"/>
+                        <div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/40 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary/40"></div>
+                    </label>
                 </div>
-                <button onclick="openNewOptimizationModal(); return false;" class="w-full py-sm bg-primary-container text-on-primary-container font-bold rounded-lg shadow-[0_0_20px_rgba(0,229,255,0.4)] hover:shadow-[0_0_30px_rgba(0,229,255,0.6)] transition-all flex items-center justify-center gap-sm mt-md group">
-                    <span class="material-symbols-outlined group-hover:rotate-180 transition-transform duration-700">bolt</span>
-                    Re-Run MILP &amp; CVRP Solvers
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-[13px] text-on-surface">Deep Packet Inspection</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input class="sr-only peer" type="checkbox"/>
+                        <div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/40 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary/40"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-[13px] text-on-surface">Redundant Uplink</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input checked="" class="sr-only peer" type="checkbox"/>
+                        <div class="w-11 h-6 bg-surface-container-highest peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white/40 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary/40"></div>
+                    </label>
+                </div>
+            </div>
+            <div class="mt-auto">
+                <button onclick="showToast('Reset', 'Tactile control weights reset to defaults.'); return false;" class="w-full py-sm bg-surface-container-high border border-white/5 rounded-xl font-mono text-[13px] font-semibold hover:bg-white/5 transition-all text-on-surface">
+                    Reset to Defaults
                 </button>
             </div>
-            <div class="mt-lg pt-md border-t border-outline-variant/20">
-                <p class="text-xs text-on-surface-variant mb-sm uppercase font-bold tracking-tighter">Cost Comparison Analysis</p>
-                <div class="flex items-end gap-sm h-24">
-                    <div class="flex-1 bg-surface-variant/30 rounded-t relative group">
-                        <div class="absolute bottom-0 w-full bg-outline-variant/50 h-[80%] rounded-t"></div>
-                        <span class="absolute -top-5 left-0 w-full text-[10px] text-center text-on-surface-variant">Baseline</span>
-                    </div>
-                    <div class="flex-1 bg-primary-container/20 rounded-t relative group">
-                        <div class="absolute bottom-0 w-full bg-primary-fixed-dim/60 h-[35%] rounded-t shadow-[0_0_10px_rgba(0,229,255,0.3)]"></div>
-                        <span class="absolute -top-5 left-0 w-full text-[10px] text-center text-primary-fixed-dim font-bold">Optimized</span>
-                    </div>
-                </div>
+        </div>
+    </div>
+
+    <!-- Data Drawer: Multi-Tab System Logs & Routes -->
+    <section class="matte-card rounded-2xl overflow-hidden mb-lg">
+        <div class="p-md border-b border-white/5 flex flex-wrap justify-between items-center bg-white/2 gap-md">
+            <div class="flex items-center gap-sm">
+                <span class="material-symbols-outlined text-on-surface-variant">receipt_long</span>
+                <h3 class="text-[18px] font-semibold">Real-Time Data Drawer</h3>
+            </div>
+            <div class="flex flex-wrap gap-xs">
+                <button onclick="switchDrawerTab('routes'); return false;" id="drawer-btn-routes" class="px-4 py-1.5 rounded-lg font-mono text-[12px] font-bold bg-primary-container text-on-primary-container shadow-md transition-all">Active Routes & TEU Allocation</button>
+                <button onclick="switchDrawerTab('logs'); return false;" id="drawer-btn-logs" class="px-4 py-1.5 rounded-lg font-mono text-[12px] font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all">Recent System Logs</button>
+                <button onclick="switchDrawerTab('ai'); return false;" id="drawer-btn-ai" class="px-4 py-1.5 rounded-lg font-mono text-[12px] font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all">AI Forecaster Diagnostics</button>
+                <button onclick="switchDrawerTab('sql'); return false;" id="drawer-btn-sql" class="px-4 py-1.5 rounded-lg font-mono text-[12px] font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all">3NF SQLite Audit Trail</button>
             </div>
         </div>
-    </div>
 
-    <!-- Row 3: Data Drawer -->
-    <div class="glass-panel rounded-xl overflow-hidden">
-        <div class="flex border-b border-outline-variant/20 bg-surface-container/30">
-            <button id="tab-btn-routes" onclick="switchDrawerTab('routes')" class="px-md py-sm text-sm font-bold text-primary-fixed-dim border-b-2 border-primary-fixed-dim bg-primary-container/5 transition-all">Active Routes &amp; TEU Allocation</button>
-            <button id="tab-btn-ai" onclick="switchDrawerTab('ai')" class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">AI Forecaster Diagnostics</button>
-            <button id="tab-btn-sql" onclick="switchDrawerTab('sql')" class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">3NF SQLite Audit Trail</button>
-        </div>
-        <div class="p-md overflow-x-auto overflow-y-auto max-h-[360px] custom-scrollbar border-t border-outline-variant/10 relative">
-            <table id="drawer-table-routes" class="w-full text-left border-collapse">
+        <!-- Table 1: Active Routes & TEU Allocation (First table: targeted by ui_engine.py) -->
+        <div id="drawer-table-routes" class="overflow-x-auto overflow-y-auto max-h-[360px] custom-scrollbar">
+            <table class="w-full text-left border-collapse">
                 <thead>
-                <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20 sticky top-0 bg-[#080f11] backdrop-blur-md z-20 shadow-sm">
-                    <th class="pb-sm px-xs font-medium">Route ID</th>
-                    <th class="pb-sm px-xs font-medium">Mode</th>
-                    <th class="pb-sm px-xs font-medium">Origin Hub</th>
-                    <th class="pb-sm px-xs font-medium">Destination</th>
-                    <th class="pb-sm px-xs font-medium text-right">TEU Cap</th>
-                    <th class="pb-sm px-xs font-medium text-right">Optimized Load</th>
-                    <th class="pb-sm px-xs font-medium text-right">Fuel Efficiency</th>
-                    <th class="pb-sm px-xs font-medium">Status</th>
+                <tr class="font-mono text-[11px] text-on-surface-variant uppercase bg-surface-container-low/95 sticky top-0 backdrop-blur-md z-20">
+                    <th class="px-md py-sm font-medium">Route ID</th>
+                    <th class="px-md py-sm font-medium">Mode</th>
+                    <th class="px-md py-sm font-medium">Origin Hub</th>
+                    <th class="px-md py-sm font-medium">Destination</th>
+                    <th class="px-md py-sm font-medium text-right">TEU Cap</th>
+                    <th class="px-md py-sm font-medium text-right">Optimized Load</th>
+                    <th class="px-md py-sm font-medium text-right">Fuel Efficiency</th>
+                    <th class="px-md py-sm font-medium">Status</th>
                 </tr>
                 </thead>
-                <tbody class="font-mono-label text-[13px]">
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim">RT-77291</td>
-                    <td class="py-sm px-xs">Intermodal (Rail)</td>
-                    <td class="py-sm px-xs">Maersk_AMS_01</td>
-                    <td class="py-sm px-xs">Berlin_LCS_A</td>
-                    <td class="py-sm px-xs text-right">120</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">114</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">92.4%</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">LOCKED</span></td>
+                <tbody class="font-mono text-[13px] divide-y divide-white/5">
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-primary font-bold">RT-1010</td>
+                    <td class="px-md py-sm">Intermodal (Rail)</td>
+                    <td class="px-md py-sm font-semibold">Maersk_AMS_01</td>
+                    <td class="px-md py-sm font-semibold">Berlin_LCS_A</td>
+                    <td class="px-md py-sm text-right">120</td>
+                    <td class="px-md py-sm text-right font-bold text-primary">114</td>
+                    <td class="px-md py-sm text-right text-secondary">92.4%</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">SCIP_OPTIMAL</span></td>
                 </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim">RT-22810</td>
-                    <td class="py-sm px-xs">Freight (Truck)</td>
-                    <td class="py-sm px-xs">Maersk_SNG_V2</td>
-                    <td class="py-sm px-xs">Johor_B_Inland</td>
-                    <td class="py-sm px-xs text-right">40</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">38</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">88.1%</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">LOCKED</span></td>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-primary font-bold">RT-1011</td>
+                    <td class="px-md py-sm">Freight (Truck)</td>
+                    <td class="px-md py-sm font-semibold">Maersk_SNG_V2</td>
+                    <td class="px-md py-sm font-semibold">Johor_B_Inland</td>
+                    <td class="px-md py-sm text-right">40</td>
+                    <td class="px-md py-sm text-right font-bold text-primary">38</td>
+                    <td class="px-md py-sm text-right text-secondary">88.1%</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">SCIP_OPTIMAL</span></td>
                 </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim">RT-90114</td>
-                    <td class="py-sm px-xs">Feeder (Sea)</td>
-                    <td class="py-sm px-xs">Maersk_DXB_04</td>
-                    <td class="py-sm px-xs">Muscat_Port_S</td>
-                    <td class="py-sm px-xs text-right">800</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">792</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">96.8%</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-amber-950 text-amber-400 border border-amber-500/30 text-[10px]">PENDING_MILP</span></td>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-primary font-bold">RT-1012</td>
+                    <td class="px-md py-sm">Feeder (Sea)</td>
+                    <td class="px-md py-sm font-semibold">Maersk_DXB_04</td>
+                    <td class="px-md py-sm font-semibold">Muscat_Port_S</td>
+                    <td class="px-md py-sm text-right">800</td>
+                    <td class="px-md py-sm text-right font-bold text-primary">792</td>
+                    <td class="px-md py-sm text-right text-secondary">96.8%</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/20 text-[10px]">PENDING_MILP</span></td>
                 </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim">RT-11045</td>
-                    <td class="py-sm px-xs">LTL (Final Mile)</td>
-                    <td class="py-sm px-xs">Hub_London_E</td>
-                    <td class="py-sm px-xs">Dartford_Cluster</td>
-                    <td class="py-sm px-xs text-right">15</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">14.8</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">99.1%</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">LOCKED</span></td>
-                </tr>
-                </tbody>
-            </table>
-
-            <table id="drawer-table-ai" class="w-full text-left border-collapse" style="display: none;">
-                <thead>
-                <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20 sticky top-0 bg-[#080f11] backdrop-blur-md z-20 shadow-sm">
-                    <th class="pb-sm px-xs font-medium">Cluster ID</th>
-                    <th class="pb-sm px-xs font-medium">ML Model</th>
-                    <th class="pb-sm px-xs font-medium">Horizon</th>
-                    <th class="pb-sm px-xs font-medium text-right">RMSE (TEUs)</th>
-                    <th class="pb-sm px-xs font-medium text-right">MAE</th>
-                    <th class="pb-sm px-xs font-medium text-right">MAPE (%)</th>
-                    <th class="pb-sm px-xs font-medium text-right">R² Accuracy</th>
-                    <th class="pb-sm px-xs font-medium">Drift Status</th>
-                </tr>
-                </thead>
-                <tbody class="font-mono-label text-[13px]">
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">ROT_NORTH_01</td>
-                    <td class="py-sm px-xs">XGBoost-Multi</td>
-                    <td class="py-sm px-xs">30 Days</td>
-                    <td class="py-sm px-xs text-right">0.99</td>
-                    <td class="py-sm px-xs text-right">0.70</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">0.35%</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.999</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
-                </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">MUM_WEST_02</td>
-                    <td class="py-sm px-xs">XGBoost-Multi</td>
-                    <td class="py-sm px-xs">30 Days</td>
-                    <td class="py-sm px-xs text-right">1.24</td>
-                    <td class="py-sm px-xs text-right">0.95</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">0.82%</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.994</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
-                </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">SNG_EAST_03</td>
-                    <td class="py-sm px-xs">XGBoost-Multi</td>
-                    <td class="py-sm px-xs">30 Days</td>
-                    <td class="py-sm px-xs text-right">1.12</td>
-                    <td class="py-sm px-xs text-right">0.88</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">0.61%</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.996</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
-                </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">AMS_EURO_04</td>
-                    <td class="py-sm px-xs">Ensemble-LGBM</td>
-                    <td class="py-sm px-xs">30 Days</td>
-                    <td class="py-sm px-xs text-right">0.85</td>
-                    <td class="py-sm px-xs text-right">0.62</td>
-                    <td class="py-sm px-xs text-right text-emerald-400">0.29%</td>
-                    <td class="py-sm px-xs text-right font-bold text-primary-fixed-dim">0.999</td>
-                    <td class="py-sm px-xs"><span class="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-500/30 text-[10px]">STABLE</span></td>
-                </tr>
-                </tbody>
-            </table>
-
-            <table id="drawer-table-sql" class="w-full text-left border-collapse" style="display: none;">
-                <thead>
-                <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20 sticky top-0 bg-[#080f11] backdrop-blur-md z-20 shadow-sm">
-                    <th class="pb-sm px-xs font-medium">Audit ID</th>
-                    <th class="pb-sm px-xs font-medium">3NF Entity Table</th>
-                    <th class="pb-sm px-xs font-medium">Primary Key</th>
-                    <th class="pb-sm px-xs font-medium">Mutation Action</th>
-                    <th class="pb-sm px-xs font-medium">Constraint Check</th>
-                    <th class="pb-sm px-xs font-medium text-right">Latency</th>
-                    <th class="pb-sm px-xs font-medium">Sync Timestamp</th>
-                </tr>
-                </thead>
-                <tbody class="font-mono-label text-[13px]">
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99201</td>
-                    <td class="py-sm px-xs">Warehouses (3NF)</td>
-                    <td class="py-sm px-xs">WarehouseID = 'Hub_A'</td>
-                    <td class="py-sm px-xs">UPDATE CapacityTEU -> 2600</td>
-                    <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (CHECK > 0)</td>
-                    <td class="py-sm px-xs text-right">0.42ms</td>
-                    <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:00</td>
-                </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99202</td>
-                    <td class="py-sm px-xs">Customers (3NF)</td>
-                    <td class="py-sm px-xs">CustomerID = 'Dest_B'</td>
-                    <td class="py-sm px-xs">SYNC MonthlyDemand -> 1000</td>
-                    <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (FK Valid)</td>
-                    <td class="py-sm px-xs text-right">0.38ms</td>
-                    <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:01</td>
-                </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99203</td>
-                    <td class="py-sm px-xs">TransportationCost</td>
-                    <td class="py-sm px-xs">RouteKey = 'Hub_A_Dest_B'</td>
-                    <td class="py-sm px-xs">CALCULATE UnitCost -> ₹ 500</td>
-                    <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (3NF Indexed)</td>
-                    <td class="py-sm px-xs text-right">0.51ms</td>
-                    <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:02</td>
-                </tr>
-                <tr class="hover:bg-primary-container/5 border-b border-outline-variant/10 transition-colors">
-                    <td class="py-sm px-xs text-primary-fixed-dim font-bold">LOG-99204</td>
-                    <td class="py-sm px-xs">Shipments (MILP Res)</td>
-                    <td class="py-sm px-xs">ShipmentID = 1010..1014</td>
-                    <td class="py-sm px-xs">COMMIT SCIP Optimal Plan</td>
-                    <td class="py-sm px-xs text-emerald-400 font-bold">PASSED (ACID Transaction)</td>
-                    <td class="py-sm px-xs text-right">1.12ms</td>
-                    <td class="py-sm px-xs text-on-surface-variant">2026-07-13 11:24:05</td>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-primary font-bold">RT-1013</td>
+                    <td class="px-md py-sm">LTL (Final Mile)</td>
+                    <td class="px-md py-sm font-semibold">Hub_London_E</td>
+                    <td class="px-md py-sm font-semibold">Dartford_Cluster</td>
+                    <td class="px-md py-sm text-right">15</td>
+                    <td class="px-md py-sm text-right font-bold text-primary">14.8</td>
+                    <td class="px-md py-sm text-right text-secondary">99.1%</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">SCIP_OPTIMAL</span></td>
                 </tr>
                 </tbody>
             </table>
         </div>
-    </div>
+
+        <!-- Table 2: Recent System Logs -->
+        <div id="drawer-table-logs" class="overflow-x-auto overflow-y-auto max-h-[360px] custom-scrollbar" style="display: none;">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="font-mono text-[11px] text-on-surface-variant uppercase bg-surface-container-low/95 sticky top-0 backdrop-blur-md z-20">
+                    <th class="px-md py-sm font-medium">Timestamp</th>
+                    <th class="px-md py-sm font-medium">Event Source</th>
+                    <th class="px-md py-sm font-medium">Message</th>
+                    <th class="px-md py-sm font-medium">Status</th>
+                    <th class="px-md py-sm font-medium text-right">Duration</th>
+                </tr>
+                </thead>
+                <tbody class="font-mono text-[13px] divide-y divide-white/5">
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-on-surface-variant">14:02:18.421</td>
+                    <td class="px-md py-sm font-medium text-secondary">NODE_ALPHA_01</td>
+                    <td class="px-md py-sm text-on-surface">Successful hand-off to regional gateway</td>
+                    <td class="px-md py-sm">
+                        <span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[11px]">Success</span>
+                    </td>
+                    <td class="px-md py-sm text-right text-on-surface-variant">2.4ms</td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-on-surface-variant">14:02:15.902</td>
+                    <td class="px-md py-sm font-medium text-tertiary">AUTH_SERVICE_SEC</td>
+                    <td class="px-md py-sm text-on-surface">Multiple failed login attempts detected at IP 184.2.xx</td>
+                    <td class="px-md py-sm">
+                        <span class="px-2 py-0.5 rounded-full bg-tertiary/15 text-tertiary border border-tertiary/20 text-[11px]">Warning</span>
+                    </td>
+                    <td class="px-md py-sm text-right text-on-surface-variant">--</td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-on-surface-variant">14:01:54.210</td>
+                    <td class="px-md py-sm font-medium text-secondary">CORE_STORAGE</td>
+                    <td class="px-md py-sm text-on-surface">Optimization routine completed for Archive V12</td>
+                    <td class="px-md py-sm">
+                        <span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[11px]">Success</span>
+                    </td>
+                    <td class="px-md py-sm text-right text-on-surface-variant">145ms</td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-on-surface-variant">14:01:22.001</td>
+                    <td class="px-md py-sm font-medium text-primary">INGRESS_MAIN</td>
+                    <td class="px-md py-sm text-on-surface">Buffer overflow in secondary packet stream</td>
+                    <td class="px-md py-sm">
+                        <span class="px-2 py-0.5 rounded-full bg-primary/15 text-primary border border-primary/20 text-[11px]">Error</span>
+                    </td>
+                    <td class="px-md py-sm text-right text-on-surface-variant">42ms</td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm text-on-surface-variant">13:58:10.873</td>
+                    <td class="px-md py-sm font-medium text-secondary">GLOBAL_LOAD</td>
+                    <td class="px-md py-sm text-on-surface">Traffic re-routed to US-EAST availability zone</td>
+                    <td class="px-md py-sm">
+                        <span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[11px]">Success</span>
+                    </td>
+                    <td class="px-md py-sm text-right text-on-surface-variant">12ms</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table 3: AI Forecaster Diagnostics -->
+        <div id="drawer-table-ai" class="overflow-x-auto overflow-y-auto max-h-[360px] custom-scrollbar" style="display: none;">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="font-mono text-[11px] text-on-surface-variant uppercase bg-surface-container-low/95 sticky top-0 backdrop-blur-md z-20">
+                    <th class="px-md py-sm font-medium">Cluster ID</th>
+                    <th class="px-md py-sm font-medium">ML Model</th>
+                    <th class="px-md py-sm font-medium">Horizon</th>
+                    <th class="px-md py-sm font-medium text-right">RMSE (TEUs)</th>
+                    <th class="px-md py-sm font-medium text-right">MAE</th>
+                    <th class="px-md py-sm font-medium text-right">MAPE (%)</th>
+                    <th class="px-md py-sm font-medium text-right">R² Accuracy</th>
+                    <th class="px-md py-sm font-medium">Drift Status</th>
+                </tr>
+                </thead>
+                <tbody class="font-mono text-[13px] divide-y divide-white/5">
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm font-bold text-primary">Rotterdam_North</td>
+                    <td class="px-md py-sm">XGBoost-Reg-v4</td>
+                    <td class="px-md py-sm">14 Days</td>
+                    <td class="px-md py-sm text-right">12.4</td>
+                    <td class="px-md py-sm text-right">9.1</td>
+                    <td class="px-md py-sm text-right text-secondary">3.8%</td>
+                    <td class="px-md py-sm text-right font-bold text-secondary">0.984</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">STABLE</span></td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm font-bold text-primary">Hamburg_DeepSea</td>
+                    <td class="px-md py-sm">RandomForest-v2</td>
+                    <td class="px-md py-sm">30 Days</td>
+                    <td class="px-md py-sm text-right">24.8</td>
+                    <td class="px-md py-sm text-right">18.5</td>
+                    <td class="px-md py-sm text-right text-secondary">4.2%</td>
+                    <td class="px-md py-sm text-right font-bold text-secondary">0.961</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">STABLE</span></td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm font-bold text-primary">Gdansk_Baltic</td>
+                    <td class="px-md py-sm">ARIMA-Hybrid</td>
+                    <td class="px-md py-sm">7 Days</td>
+                    <td class="px-md py-sm text-right">8.2</td>
+                    <td class="px-md py-sm text-right">6.0</td>
+                    <td class="px-md py-sm text-right text-secondary">2.9%</td>
+                    <td class="px-md py-sm text-right font-bold text-secondary">0.991</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">STABLE</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Table 4: 3NF SQLite Audit Trail -->
+        <div id="drawer-table-sql" class="overflow-x-auto overflow-y-auto max-h-[360px] custom-scrollbar" style="display: none;">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                <tr class="font-mono text-[11px] text-on-surface-variant uppercase bg-surface-container-low/95 sticky top-0 backdrop-blur-md z-20">
+                    <th class="px-md py-sm font-medium">Audit ID</th>
+                    <th class="px-md py-sm font-medium">Timestamp</th>
+                    <th class="px-md py-sm font-medium">User / Service</th>
+                    <th class="px-md py-sm font-medium">Action Performed</th>
+                    <th class="px-md py-sm font-medium">Target Table</th>
+                    <th class="px-md py-sm font-medium">Status</th>
+                </tr>
+                </thead>
+                <tbody class="font-mono text-[13px] divide-y divide-white/5">
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm font-bold text-on-surface">AUD-9941</td>
+                    <td class="px-md py-sm text-on-surface-variant">2026-07-13 13:42:10</td>
+                    <td class="px-md py-sm text-secondary font-semibold">SCIP_MILP_SOLVER</td>
+                    <td class="px-md py-sm">INSERT INTO active_routes (4 rows optimized)</td>
+                    <td class="px-md py-sm font-mono text-[11px] text-primary">logistics.db / shipments</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">COMMIT_OK</span></td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm font-bold text-on-surface">AUD-9940</td>
+                    <td class="px-md py-sm text-on-surface-variant">2026-07-13 13:40:02</td>
+                    <td class="px-md py-sm text-tertiary font-semibold">XGBOOST_FORECASTER</td>
+                    <td class="px-md py-sm">UPDATE demand_forecasts SET rmse=0.842</td>
+                    <td class="px-md py-sm font-mono text-[11px] text-primary">logistics.db / metrics</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">COMMIT_OK</span></td>
+                </tr>
+                <tr class="hover:bg-white/2 transition-colors">
+                    <td class="px-md py-sm font-bold text-on-surface">AUD-9939</td>
+                    <td class="px-md py-sm text-on-surface-variant">2026-07-13 13:35:15</td>
+                    <td class="px-md py-sm text-on-surface font-semibold">ADMIN_USER</td>
+                    <td class="px-md py-sm">SELECT * FROM warehouses WHERE capacity > 1000</td>
+                    <td class="px-md py-sm font-mono text-[11px] text-primary">logistics.db / hubs</td>
+                    <td class="px-md py-sm"><span class="px-2 py-0.5 rounded-full bg-secondary/15 text-secondary border border-secondary/20 text-[10px]">QUERY_OK</span></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="p-sm bg-surface-container-low/30 border-t border-white/5 flex justify-center">
+            <button onclick="showToast('Logs Download', 'Exporting all system logs to CSV.'); return false;" class="font-mono text-[12px] text-on-surface-variant hover:text-on-surface transition-all flex items-center gap-xs">
+                View & Export Full Logs <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+            </button>
+        </div>
+    </section>
 </main>
 
-<!-- Floating Atmosphere FX -->
-<div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-    <div class="absolute top-[10%] left-[20%] w-[40rem] h-[40rem] bg-secondary-container/10 blur-[120px] rounded-full animate-pulse"></div>
-    <div class="absolute bottom-[5%] right-[10%] w-[30rem] h-[30rem] bg-primary-container/5 blur-[100px] rounded-full"></div>
+<!-- FAB for Critical Actions -->
+<div class="fixed bottom-lg right-lg z-50">
+    <button onclick="showToast('New Operation', 'Launching MILP optimization modal... check Streamlit Tab 1 for parameters.'); return false;" class="w-16 h-16 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all group">
+        <span class="material-symbols-outlined text-[32px] group-hover:rotate-90 transition-transform duration-300">add</span>
+    </button>
 </div>
 
-<!-- Modal: New Optimization Parameter Configuration -->
-<div id="new-opt-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
-    <div class="bg-surface-container-high border border-primary-fixed-dim/40 rounded-xl p-md max-w-lg w-full mx-4 shadow-[0_0_40px_rgba(0,229,255,0.25)] transform scale-95 transition-transform duration-300">
-        <div class="flex justify-between items-center pb-sm border-b border-outline-variant/20 mb-md">
-            <div class="flex items-center gap-xs">
-                <span class="material-symbols-outlined text-primary-fixed-dim">tune</span>
-                <h3 class="font-headline-md text-lg font-bold text-on-surface">Configure Optimization Run</h3>
-            </div>
-            <button onclick="closeNewOptimizationModal()" class="text-on-surface-variant hover:text-white transition-colors">
-                <span class="material-symbols-outlined">close</span>
-            </button>
-        </div>
-        <div class="space-y-sm text-sm">
-            <div>
-                <label class="block text-xs font-mono-label uppercase tracking-wider text-on-surface-variant mb-1">Select Operations Research Engine</label>
-                <select id="modal-engine-select" class="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-on-surface focus:border-primary-fixed-dim focus:outline-none">
-                    <option value="milp">SCIP Mixed Integer Linear Programming (Global Allocation)</option>
-                    <option value="cvrp">OR-Tools Guided Local Search (Multi-Stop Routing)</option>
-                    <option value="xgb">XGBoost Multi-Horizon Forecaster + MILP Coupling</option>
-                </select>
-            </div>
-            <div>
-                <label class="block text-xs font-mono-label uppercase tracking-wider text-on-surface-variant mb-1">Optimization Target Objective</label>
-                <div class="grid grid-cols-2 gap-2">
-                    <button class="border border-primary-fixed-dim bg-primary-container/10 text-primary-fixed-dim p-2 rounded-lg font-bold text-xs">Minimize Total Freight Cost ($)</button>
-                    <button class="border border-outline-variant/30 bg-surface-variant/20 text-on-surface-variant p-2 rounded-lg text-xs hover:border-outline-variant">Minimize Carbon Emission (kg)</button>
-                </div>
-            </div>
-            <div>
-                <label class="block text-xs font-mono-label uppercase tracking-wider text-on-surface-variant mb-1">Max Solver Time Limit (Seconds)</label>
-                <input type="number" value="30" class="w-full bg-surface-container-lowest border border-outline-variant/40 rounded-lg p-2 text-on-surface focus:border-primary-fixed-dim focus:outline-none"/>
-            </div>
-        </div>
-        <div class="flex justify-end gap-sm mt-lg pt-sm border-t border-outline-variant/20">
-            <button onclick="closeNewOptimizationModal()" class="px-sm py-2 rounded-lg border border-outline-variant/30 text-on-surface-variant hover:bg-surface-variant/30 text-xs font-bold transition-all">Cancel</button>
-            <button id="btn-modal-execute" onclick="executeNewOptimizationRun()" class="px-md py-2 rounded-lg bg-primary-container text-on-primary-container font-bold text-xs shadow-[0_0_15px_rgba(0,229,255,0.4)] hover:shadow-[0_0_25px_rgba(0,229,255,0.7)] transition-all flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm">bolt</span> Execute Custom Solver →
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Toast Notification -->
-<div id="toast-notification" class="glass-panel border-l-4 border-l-primary-fixed-dim px-md py-sm rounded-lg shadow-2xl flex items-center gap-sm max-w-md">
-    <div class="w-8 h-8 rounded-full bg-primary-container/20 flex items-center justify-center flex-shrink-0">
-        <span class="material-symbols-outlined text-primary-fixed-dim text-sm">check_circle</span>
-    </div>
+<!-- Toast Box -->
+<div id="toast-box" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 bg-surface-container-highest border border-primary/40 px-6 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+    <span class="material-symbols-outlined text-primary text-[20px]">info</span>
     <div>
-        <h4 id="toast-title" class="font-bold text-on-surface text-sm">⚡ Engine Event</h4>
-        <p id="toast-msg" class="text-xs text-on-surface-variant">Action executed successfully.</p>
+        <h4 id="toast-title" class="font-bold text-sm text-on-surface">Notification</h4>
+        <p id="toast-msg" class="text-xs text-on-surface-variant">Message content</p>
     </div>
 </div>
 
+<!-- Micro-interaction for sliders and hover effects + SPA Navigation -->
 <script>
-    // Restore ALL_SCREENS_HTML if available from sessionStorage
-    if (!window.ALL_SCREENS_HTML) {
-        try {
-            const saved = sessionStorage.getItem('SAVED_SCREENS_HTML');
-            if (saved) window.ALL_SCREENS_HTML = JSON.parse(saved);
-        } catch(e) {}
-    }
-    if (window.ALL_SCREENS_HTML) {
-        try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e) {}
+    function showToast(title, msg) {
+        const box = document.getElementById('toast-box');
+        document.getElementById('toast-title').innerText = title;
+        document.getElementById('toast-msg').innerText = msg;
+        box.classList.add('show');
+        setTimeout(() => box.classList.remove('show'), 3500);
     }
 
-    // Micro-interactions for KPI values
-    document.querySelectorAll('h3').forEach(el => {
-        el.addEventListener('mouseenter', () => {
-            el.style.transform = 'scale(1.05)';
-            el.style.color = '#ffffff';
+    function switchDrawerTab(tabId) {
+        const tabs = ['routes', 'logs', 'ai', 'sql'];
+        tabs.forEach(t => {
+            const tableEl = document.getElementById('drawer-table-' + t);
+            const btnEl = document.getElementById('drawer-btn-' + t);
+            if (tableEl && btnEl) {
+                if (t === tabId) {
+                    tableEl.style.display = 'block';
+                    btnEl.className = 'px-4 py-1.5 rounded-lg font-mono text-[12px] font-bold bg-primary-container text-on-primary-container shadow-md transition-all';
+                } else {
+                    tableEl.style.display = 'none';
+                    btnEl.className = 'px-4 py-1.5 rounded-lg font-mono text-[12px] font-medium text-on-surface-variant hover:text-on-surface hover:bg-white/5 transition-all';
+                }
+            }
         });
-        el.addEventListener('mouseleave', () => {
-            el.style.transform = 'scale(1)';
-            el.style.color = '#00daf3';
+    }
+
+    function switchMainScreen(screenName, tabKey) {
+        if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[screenName]) {
+            document.open();
+            document.write(window.ALL_SCREENS_HTML[screenName]);
+            document.close();
+        } else {
+            showToast("Screen Loading", "Navigating to " + screenName + "...");
+        }
+    }
+
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+        slider.addEventListener('input', function() {
+            const valueSpan = this.parentElement.querySelector('span');
+            if (valueSpan) {
+                valueSpan.innerText = this.value + (this.max == 100 && !valueSpan.innerText.includes('ms') ? '%' : (valueSpan.innerText.includes('ms') ? 'ms' : '%'));
+            }
         });
     });
 
-    function switchMapMode(mode) {
-        const btns = {'milp': 'btn-map-milp', 'cvrp': 'btn-map-cvrp', 'heat': 'btn-map-heat'};
-        for (let k in btns) {
-            const el = document.getElementById(btns[k]);
-            if (!el) continue;
-            if (k === mode) {
-                el.className = 'bg-primary-container/20 text-primary-fixed-dim text-xs px-xs py-1 rounded border border-primary-fixed-dim/40 font-bold transition-all shadow-[0_0_8px_rgba(0,229,255,0.3)]';
-            } else {
-                el.className = 'bg-surface-variant/40 hover:bg-surface-variant/60 text-xs px-xs py-1 rounded border border-outline-variant/30 text-on-surface-variant transition-all';
-            }
-        }
-        const gMilp = document.getElementById('map-group-milp');
-        const gCvrp = document.getElementById('map-group-cvrp');
-        const gHeat = document.getElementById('map-group-heat');
-        if (gMilp) gMilp.classList.add('hidden');
-        if (gCvrp) gCvrp.classList.add('hidden');
-        if (gHeat) gHeat.classList.add('hidden');
-        const target = document.getElementById('map-group-' + mode);
-        if (target) target.classList.remove('hidden');
-        showToast('Map Layer Switched', 'Displaying active ' + mode.toUpperCase() + ' network overlay.');
-    }
-
-    function updateSliderValue(rangeEl) {
-        const parent = rangeEl.closest('.space-y-xs') || rangeEl.parentElement;
-        if (!parent) return;
-        const valSpan = parent.querySelector('span.text-primary-fixed-dim, span.font-mono-label, span.font-bold');
-        if (valSpan) {
-            let val = rangeEl.value;
-            if (valSpan.innerText.includes('%')) {
-                valSpan.innerText = val + '%';
-            } else if (valSpan.innerText.includes('x')) {
-                valSpan.innerText = val + 'x';
-            } else if (valSpan.innerText.includes('High') || valSpan.innerText.includes('/10')) {
-                let label = val >= 7 ? 'High' : (val >= 4 ? 'Medium' : 'Low');
-                valSpan.innerText = label + ' (' + val + '/10)';
-            } else {
-                valSpan.innerText = val;
-            }
-        }
-        showToast('Parameter Adjusted: ' + rangeEl.value, 'Recalculating network sensitivity constraints...');
-    }
-
-    function switchDrawerTab(tabName) {
-        const tabs = {'routes': 'tab-btn-routes', 'ai': 'tab-btn-ai', 'sql': 'tab-btn-sql'};
-        const contents = {'routes': 'drawer-table-routes', 'ai': 'drawer-table-ai', 'sql': 'drawer-table-sql'};
-        for (let k in tabs) {
-            const btn = document.getElementById(tabs[k]);
-            if (btn) {
-                if (k === tabName) {
-                    btn.className = 'px-md py-sm text-sm font-bold text-primary-fixed-dim border-b-2 border-primary-fixed-dim bg-primary-container/5 transition-all';
-                } else {
-                    btn.className = 'px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all';
-                }
-            }
-            const tbl = document.getElementById(contents[k]);
-            if (tbl) {
-                if (k === tabName) {
-                    tbl.style.display = 'table';
-                } else {
-                    tbl.style.display = 'none';
-                }
-            }
-        }
-        showToast('Data Drawer Switched', 'Inspecting live ' + tabName.toUpperCase() + ' database analytics view.');
-    }
-
-    function switchMainScreen(targetScreen, viewMode) {
-        if (viewMode === 'cost') {
-            if (!document.getElementById('drawer-table-routes') && window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML['dashboard_preview.html']) {
-                try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e){}
-                document.open();
-                document.write(window.ALL_SCREENS_HTML['dashboard_preview.html']);
-                document.close();
-                setTimeout(() => {
-                    const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
-                    if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
-                    switchDrawerTab('routes');
-                    showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown: ₹ 6,600 Optimal vs ₹ 19,800 Baseline.');
-                }, 100);
-                return false;
-            }
-            const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
-            if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
-            switchDrawerTab('routes');
-            showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown: ₹ 6,600 Optimal vs ₹ 19,800 Baseline.');
-            return false;
-        }
-
-        if (viewMode === 'audit') {
-            if (!document.getElementById('drawer-table-sql') && window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML['dashboard_preview.html']) {
-                try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e){}
-                document.open();
-                document.write(window.ALL_SCREENS_HTML['dashboard_preview.html']);
-                document.close();
-                setTimeout(() => {
-                    switchDrawerTab('sql');
-                    const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
-                    if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
-                    showToast('3NF Audit Logs Active', 'Inspecting real-time ACID transaction audit trail.');
-                }, 100);
-                return false;
-            }
-            switchDrawerTab('sql');
-            const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
-            if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
-            showToast('3NF Audit Logs Active', 'Inspecting real-time ACID transaction audit trail.');
-            return false;
-        }
-
-        if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[targetScreen]) {
-            try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e) {}
-            document.open();
-            document.write(window.ALL_SCREENS_HTML[targetScreen]);
-            document.close();
-            return false;
-        }
-
-        // Try parent Streamlit navigation
-        try {
-            if (window.parent && window.parent.document) {
-                const labels = window.parent.document.querySelectorAll('div[role="radiogroup"] label, label[data-baseweb="radio"], p, span, div[data-testid="stRadio"] label, button[role="tab"]');
-                if (labels && labels.length > 0) {
-                    for (let label of labels) {
-                        const txt = (label.innerText || label.textContent || '').trim();
-                        if (
-                            (targetScreen === 'dashboard_preview.html' && (txt.includes('UI Command Center') || txt.includes('Network Topology'))) ||
-                            (targetScreen === 'demand_forecaster.html' && (txt.includes('AI Demand Forecaster') || txt.includes('Forecaster'))) ||
-                            (targetScreen === 'cvrp_explorer.html' && (txt.includes('Vehicle Routing') || txt.includes('VRP')))
-                        ) {
-                            label.click();
-                            showToast('Switched Screen', 'Navigating to ' + targetScreen);
-                            return false;
-                        }
-                    }
-                }
-            }
-        } catch(e) {}
-
-        try { window.location.href = targetScreen; } catch(e) {}
-        return false;
-    }
-
-    function openNewOptimizationModal() {
-        const modal = document.getElementById('new-opt-modal');
-        if (modal) {
-            modal.classList.remove('opacity-0', 'pointer-events-none');
-            const inner = modal.querySelector('.max-w-lg');
-            if (inner) inner.classList.remove('scale-95');
-        } else {
-            showToast('SCIP MILP & CVRP Engine Ready', 'All 36 global freight corridors currently optimized at ₹ 6,600 total freight cost.');
-        }
-    }
-
-    function closeNewOptimizationModal() {
-        const modal = document.getElementById('new-opt-modal');
-        if (modal) {
-            modal.classList.add('opacity-0', 'pointer-events-none');
-            const inner = modal.querySelector('.max-w-lg');
-            if (inner) inner.classList.add('scale-95');
-        }
-    }
-
-    function executeNewOptimizationRun() {
-        const btn = document.getElementById('btn-modal-execute');
-        const eng = document.getElementById('modal-engine-select')?.value || 'milp';
-        if (btn) {
-            btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Computing Global Optimum...';
-            btn.disabled = true;
-        }
-        setTimeout(() => {
-            closeNewOptimizationModal();
-            if (btn) {
-                btn.innerHTML = '<span class="material-symbols-outlined text-sm">bolt</span> Execute Custom Solver →';
-                btn.disabled = false;
-            }
-            if (eng === 'milp') {
-                showToast('SCIP MILP Converged', 'Custom network hub allocation solved in 14.8ms. Freight cost: ₹ 6,600 | Savings: 66.6%');
-            } else if (eng === 'xgb') {
-                showToast('XGBoost Multi-Horizon Retrained', 'Custom 30-day forecast generated across Rotterdam Hub cluster (`R² = 0.999`).');
-            } else {
-                showToast('OR-Tools GLS Dispatched', 'Custom multi-stop loops scheduled for Rotterdam Depot across 16 active EV trucks.');
-            }
-        }, 800);
-    }
-
-    function showToast(title, message) {
-        const toast = document.getElementById('toast-notification');
-        if (!toast) return;
-        const titleEl = document.getElementById('toast-title');
-        const msgEl = document.getElementById('toast-msg');
-        if (titleEl) titleEl.innerText = '⚡ ' + title;
-        if (msgEl) msgEl.innerText = message;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3800);
-    }
+    // Add subtle movement to ambient glows
+    document.addEventListener('mousemove', (e) => {
+        const glows = document.querySelectorAll('.glow-ambient');
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+        
+        glows.forEach((glow, index) => {
+            const speed = (index + 1) * 20;
+            glow.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+        });
+    });
 </script>
 </body>
 </html>

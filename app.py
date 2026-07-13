@@ -217,8 +217,19 @@ tab_mockup, tab_opt, tab_ai, tab_viz, tab_vrp, tab_sql, tab_data = st.tabs([
 # TAB 0: HIGH-FIDELITY UI COMMAND CENTER MOCKUPS
 # ---------------------------------------------------------
 with tab_mockup:
-    st.markdown("### ⚓ Maersk AI Logistics Enterprise Command Center")
-    st.write("Full-screen, ultra-low latency **Single-Page Operations Research & ML Platform** (`#000F1C` obsidian navy + `#00E5FF` electric cyan). Use the left navigation bar (`Network Topology`, `Demand Forecaster`, `CVRP Dispatcher`, `+ New Optimization`) to switch views instantly.")
+    st.markdown("### 🛡️ Obsidian Hearth — Strategic Operations & AI Logistics Command Center")
+    st.markdown("""
+    <div style="background-color: #181B22; border: 1px solid rgba(0, 229, 255, 0.2); padding: 14px 20px; border-radius: 10px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+            <span style="color: #00E5FF; font-weight: bold; font-family: 'JetBrains Mono', monospace;">● SYSTEM CONSOLE V2.4.0-STABLE</span>
+            <p style="color: #dbc1ba; font-size: 13px; margin: 4px 0 0 0;">Interactive SPA built with <b>Matte Graphite (#181B22)</b> & <b>Obsidian Surface (#051424)</b>. Use the top bar (<i>Dashboard</i>, <i>Projects</i>, <i>Analytics</i>) or sidebar to switch live UI views instantly.</p>
+        </div>
+        <div style="text-align: right;">
+            <span style="background: rgba(129, 178, 154, 0.15); color: #81B29A; border: 1px solid rgba(129, 178, 154, 0.3); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: bold;">SCIP MILP OPTIMAL</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    st.write("💡 **Dashboard Navigation Note:** The full interactive SPA runs directly inside the live viewport below. To access our raw **Streamlit Optimization Engines** (`SCIP MILP`, `XGBoost Forecaster`, `Guided Local Search VRP`, and `3NF SQLite Sandbox`), simply click any of the navigation tabs at the top of the screen!")
     
     # Load and populate clean templates
     with open("dashboard_preview.html", "r", encoding="utf-8") as f:

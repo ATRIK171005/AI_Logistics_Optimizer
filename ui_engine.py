@@ -151,6 +151,6 @@ def populate_cvrp_explorer(html_code, vrp_result, depot_name="Port of Rotterdam"
             """
         
         pattern = re.compile(r'<div class="flex-grow overflow-y-auto custom-scrollbar p-sm space-y-sm">.*?</div>\s*<div class="p-sm bg-surface-container-high/30', re.DOTALL)
-        html_code = pattern.sub(f'<tbody class="font-mono-label text-[13px]">{rows_html}</tbody>', html_code, count=1)
+        html_code = pattern.sub(f'<div class="flex-grow overflow-y-auto custom-scrollbar p-sm space-y-sm">{truck_cards_html}</div>\n              <div class="p-sm bg-surface-container-high/30', html_code, count=1)
 
     return html_code
