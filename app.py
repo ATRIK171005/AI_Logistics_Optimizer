@@ -218,9 +218,10 @@ with tab_mockup:
     with open("cvrp_explorer.html", "r", encoding="utf-8") as f:
         h_cvrp_live = ui_engine.populate_cvrp_explorer(f.read(), st.session_state.get("cvrp_live_res"), st.session_state.get("live_dep", "Port of Rotterdam"))
         
-    # Strip any prior window.ALL_SCREENS_HTML so we don't nest infinitely
+    # Strip any prior window.ALL_SCREENS_HTML so we don't nest strings
     def strip_all_screens(s):
-        return re.sub(r'<script>window\.ALL_SCREENS_HTML = \{.*?\};</script>', '', s, flags=re.DOTALL)
+        s = re.sub(r'<script>window\.ALL_SCREENS_HTML = \{.*?\};</script>', '', s, flags=re.DOTALL)
+        return re.sub(r'window\.ALL_SCREENS_HTML = \{.*?\};', '', s, flags=re.DOTALL)
         
     h_dash_clean = strip_all_screens(h_dash_live)
     h_fc_clean = strip_all_screens(h_fc_live)
@@ -232,7 +233,9 @@ with tab_mockup:
         "cvrp_explorer.html": h_cvrp_clean,
         "index.html": h_dash_clean
     }
-    live_screens_js = '<script>window.ALL_SCREENS_HTML = ' + json.dumps(live_screens_dict) + ';</script>'
+    # CRITICAL FIX: Escape </script> as <\/script> so HTML parser never closes the <script> tag early!
+    json_dump_escaped = json.dumps(live_screens_dict).replace('</script>', '<\\/script>')
+    live_screens_js = '<script>window.ALL_SCREENS_HTML = ' + json_dump_escaped + ';</script>'
     
     final_spa_code = h_dash_clean.replace('<head>', '<head>' + live_screens_js, 1)
     
