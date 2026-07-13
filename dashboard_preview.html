@@ -355,10 +355,10 @@
             <button id="tab-btn-ai" onclick="switchDrawerTab('ai')" class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">AI Forecaster Diagnostics</button>
             <button id="tab-btn-sql" onclick="switchDrawerTab('sql')" class="px-md py-sm text-sm text-on-surface-variant hover:text-primary hover:bg-surface-variant/20 transition-all">3NF SQLite Audit Trail</button>
         </div>
-        <div class="p-md overflow-x-auto">
+        <div class="p-md overflow-x-auto overflow-y-auto max-h-[420px] custom-scrollbar border-t border-outline-variant/10 relative">
             <table id="drawer-table-routes" class="w-full text-left border-collapse">
                 <thead>
-                <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20">
+                <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20 sticky top-0 bg-[#080f11]/95 backdrop-blur-md z-20 shadow-sm">
                     <th class="pb-sm px-xs font-medium">Route ID</th>
                     <th class="pb-sm px-xs font-medium">Mode</th>
                     <th class="pb-sm px-xs font-medium">Origin Hub</th>
@@ -415,7 +415,7 @@
 
 <table id="drawer-table-ai" class="w-full text-left border-collapse" style="display: none;">
     <thead>
-    <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20">
+    <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20 sticky top-0 bg-[#080f11]/95 backdrop-blur-md z-20 shadow-sm">
         <th class="pb-sm px-xs font-medium">Cluster ID</th>
         <th class="pb-sm px-xs font-medium">ML Model</th>
         <th class="pb-sm px-xs font-medium">Horizon</th>
@@ -473,7 +473,7 @@
 
 <table id="drawer-table-sql" class="w-full text-left border-collapse" style="display: none;">
     <thead>
-    <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20">
+    <tr class="text-[11px] uppercase tracking-widest text-on-surface-variant border-b border-outline-variant/20 sticky top-0 bg-[#080f11]/95 backdrop-blur-md z-20 shadow-sm">
         <th class="pb-sm px-xs font-medium">Audit ID</th>
         <th class="pb-sm px-xs font-medium">3NF Entity Table</th>
         <th class="pb-sm px-xs font-medium">Primary Key</th>
