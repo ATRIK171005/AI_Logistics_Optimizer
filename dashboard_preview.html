@@ -515,8 +515,9 @@
 </div>
 
 
+
 <script>
-    // Restore ALL_SCREENS_HTML from sessionStorage if document.write wiped it previously
+    // Restore ALL_SCREENS_HTML from sessionStorage if needed
     if (!window.ALL_SCREENS_HTML) {
         try {
             const saved = sessionStorage.getItem('SAVED_SCREENS_HTML');
@@ -529,6 +530,89 @@
         } catch(e) {}
     }
 
+    // 1. Holiday & Monsoon Toggle Handler
+    function toggleHolidayMonsoon(labelEl, name) {
+        const checkbox = labelEl.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            const isChecked = checkbox.checked;
+            showToast(name + (isChecked ? ' Activated' : ' Deactivated'), 
+                      name + (isChecked ? ' surge active (+18.5% TEU weighting applied to forecast curve).' : ' normalized to baseline schedule.'));
+            
+            // Adjust SVG dots dynamically
+            const dots = document.querySelectorAll('svg circle.predicted-dot');
+            dots.forEach((dot, idx) => {
+                let cy = parseFloat(dot.getAttribute('data-base-cy') || dot.getAttribute('cy'));
+                if (!dot.getAttribute('data-base-cy')) dot.setAttribute('data-base-cy', cy);
+                let newCy = isChecked ? Math.max(20, cy - (idx * 4 + 10)) : cy;
+                dot.setAttribute('cy', newCy);
+            });
+            const path = document.querySelector('path.predicted-line');
+            if (path && dots.length > 0) {
+                let d = 'M ' + dots[0].getAttribute('cx') + ',' + dots[0].getAttribute('cy');
+                for (let i = 1; i < dots.length; i++) {
+                    d += ' L ' + dots[i].getAttribute('cx') + ',' + dots[i].getAttribute('cy');
+                }
+                path.setAttribute('d', d);
+            }
+        }
+    }
+
+    // 2. ML Model Selection Handler (Random Forest, XGBoost, Baseline)
+    function switchMLModel(spanEl, modelName) {
+        const container = spanEl.parentElement;
+        if (!container) return;
+        const allBadges = container.querySelectorAll('span');
+        allBadges.forEach(b => {
+            const txt = (b.innerText || b.textContent || '').trim();
+            if (txt.includes(modelName)) {
+                b.className = 'px-sm py-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-[0_0_10px_rgba(0,229,255,0.4)] cursor-pointer transition-all';
+                if (!b.querySelector('.animate-pulse')) {
+                    b.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> ' + modelName + ' (Active)';
+                }
+            } else {
+                let rawTxt = txt.replace(/\(Active\)/g, '').replace('•', '').trim();
+                b.className = 'px-sm py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright cursor-pointer transition-colors';
+                b.innerHTML = rawTxt;
+            }
+        });
+
+        // Update KPI cards based on model
+        const rmseEl = document.querySelector('.grid.grid-cols-2 p.font-mono-kpi');
+        if (modelName.includes('Random Forest')) {
+            showToast('Random Forest Ensemble Active', '30-day decision tree bagging retrained (`RMSE: 0.781`, `R²: 0.992`).');
+            if (rmseEl) rmseEl.innerText = '0.781';
+        } else if (modelName.includes('Baseline')) {
+            showToast('Baseline Linear Regression Active', 'Simple OLS trendline loaded (`RMSE: 1.412`, `R²: 0.914`).');
+            if (rmseEl) rmseEl.innerText = '1.412';
+        } else {
+            showToast('XGBoost Multi-Horizon Active', 'Gradient boosted trees retrained across Rotterdam Hub (`RMSE: 0.842`, `R²: 0.999`).');
+            if (rmseEl) rmseEl.innerText = '0.842';
+        }
+    }
+
+    // 3. Slider Value Live Scale Update
+    function updateSliderValue(rangeEl) {
+        const parent = rangeEl.closest('.space-y-xs') || rangeEl.parentElement;
+        if (!parent) return;
+        const valSpan = parent.querySelector('span.text-primary-fixed-dim, span.font-mono-label, span.font-bold');
+        if (valSpan) {
+            let val = rangeEl.value;
+            if (valSpan.innerText.includes('%')) {
+                valSpan.innerText = val + '%';
+            } else if (valSpan.innerText.includes('₹') || valSpan.innerText.includes('$')) {
+                valSpan.innerText = '₹ ' + val;
+            } else if (valSpan.innerText.includes('.')) {
+                valSpan.innerText = parseFloat(val).toFixed(1);
+            } else {
+                valSpan.innerText = val + '.0';
+            }
+        }
+        // If this is Sales Index or Promo discount, trigger subtle curve shift feedback
+        showToast('Scale Adjusted: ' + rangeEl.value, 'Recalculating container volume allocation sensitivity...');
+    }
+
+    // 4. Sidebar Highlights & Navigation
     function updateSidebarHighlight(activeText) {
         const links = document.querySelectorAll('aside a, aside button.nav-link');
         links.forEach(a => {
@@ -548,14 +632,41 @@
     function switchMainScreen(targetScreen, viewMode) {
         if (viewMode === 'cost') {
             updateSidebarHighlight('Cost Analytics');
+            // Check if we are on dashboard_preview.html right now
+            if (!document.getElementById('drawer-table-routes') && window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML['dashboard_preview.html']) {
+                try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e){}
+                document.open();
+                document.write(window.ALL_SCREENS_HTML['dashboard_preview.html']);
+                document.close();
+                setTimeout(() => {
+                    const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
+                    if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    if (typeof switchDrawerTab === 'function') switchDrawerTab('routes');
+                    showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown: ₹ 6,600 Optimal vs ₹ 19,800 Baseline (66.6% Savings).');
+                }, 100);
+                return false;
+            }
             const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
             if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
             if (typeof switchDrawerTab === 'function') switchDrawerTab('routes');
-            showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown ($1,425,800 vs $2,180,000 baseline).');
+            showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown: ₹ 6,600 Optimal vs ₹ 19,800 Baseline (66.6% Savings).');
             return false;
         }
         if (viewMode === 'audit') {
             updateSidebarHighlight('Audit Logs');
+            if (!document.getElementById('drawer-table-sql') && window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML['dashboard_preview.html']) {
+                try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e){}
+                document.open();
+                document.write(window.ALL_SCREENS_HTML['dashboard_preview.html']);
+                document.close();
+                setTimeout(() => {
+                    if (typeof switchDrawerTab === 'function') switchDrawerTab('sql');
+                    const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
+                    if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    showToast('3NF Audit Logs Active', 'Inspecting real-time ACID transaction audit trail (0.42ms average sync latency).');
+                }, 100);
+                return false;
+            }
             if (typeof switchDrawerTab === 'function') switchDrawerTab('sql');
             const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
             if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -563,18 +674,14 @@
             return false;
         }
 
-        // For topology, forecaster, and cvrp: instantly switch the single-page view without hiding the dashboard!
         if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[targetScreen]) {
-            try {
-                sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML));
-            } catch(e) {}
+            try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e) {}
             document.open();
             document.write(window.ALL_SCREENS_HTML[targetScreen]);
             document.close();
             return false;
         }
 
-        // Try switching parent Streamlit tab if inside Streamlit
         try {
             if (window.parent && window.parent.document) {
                 const labels = window.parent.document.querySelectorAll('div[role="radiogroup"] label, label[data-baseweb="radio"], p, span, div[data-testid="stRadio"] label, button[role="tab"]');
@@ -595,9 +702,7 @@
             }
         } catch(e) {}
 
-        try {
-            window.location.href = targetScreen;
-        } catch(e) {}
+        try { window.location.href = targetScreen; } catch(e) {}
         return false;
     }
 
@@ -627,24 +732,20 @@
                 el.className = 'bg-surface-variant/40 hover:bg-surface-variant/60 text-xs px-xs py-1 rounded border border-outline-variant/30 text-on-surface-variant transition-all';
             }
         }
-        
         const gMilp = document.getElementById('map-group-milp');
         const gCvrp = document.getElementById('map-group-cvrp');
         const gHeat = document.getElementById('map-group-heat');
         if (gMilp) gMilp.classList.add('hidden');
         if (gCvrp) gCvrp.classList.add('hidden');
         if (gHeat) gHeat.classList.add('hidden');
-        
         const target = document.getElementById('map-group-' + mode);
         if (target) target.classList.remove('hidden');
-
         showToast('Map Mode Switched', 'Displaying active ' + mode.toUpperCase() + ' network layer.');
     }
 
     function switchDrawerTab(tabName) {
         const tabs = {'routes': 'tab-btn-routes', 'ai': 'tab-btn-ai', 'sql': 'tab-btn-sql'};
         const contents = {'routes': 'drawer-table-routes', 'ai': 'drawer-table-ai', 'sql': 'drawer-table-sql'};
-        
         for (let k in tabs) {
             const btn = document.getElementById(tabs[k]);
             if (btn) {
@@ -693,7 +794,6 @@
             btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Computing Global Optimum...';
             btn.disabled = true;
         }
-
         setTimeout(() => {
             closeNewOptimizationModal();
             if (btn) {

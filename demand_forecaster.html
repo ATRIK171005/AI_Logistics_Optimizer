@@ -230,24 +230,24 @@
                                 <label class="text-xs font-mono-label text-on-surface-variant uppercase tracking-wider">Sales Index</label>
                                 <span class="text-primary-fixed-dim font-mono-label font-bold">124.5</span>
                             </div>
-                            <input class="w-full custom-range" max="200" min="0" type="range" value="124"/>
+                            <input class="w-full custom-range"  max="200" min="0" type="range" value="124"/ oninput="updateSliderValue(this)">
                         </div>
                         <!-- Switches -->
                         <div class="space-y-sm">
-                            <div class="flex items-center justify-between group">
+                            <label onclick="toggleHolidayMonsoon(this, 'Holiday Surge')" class="flex items-center justify-between group cursor-pointer py-1">
                                 <span class="text-sm font-body-md text-on-surface">Holiday Surge</span>
-                                <div class="relative inline-flex items-center cursor-pointer">
-                                    <input checked="" class="sr-only peer" type="checkbox"/>
+                                <div class="relative inline-flex items-center">
+                                    <input class="sr-only peer" type="checkbox"/>
                                     <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-container shadow-inner"></div>
                                 </div>
-                            </div>
-                            <div class="flex items-center justify-between group">
+                            </label>
+                            <label onclick="toggleHolidayMonsoon(this, 'Monsoon Disruption')" class="flex items-center justify-between group cursor-pointer py-1">
                                 <span class="text-sm font-body-md text-on-surface">Monsoon Disruption</span>
-                                <div class="relative inline-flex items-center cursor-pointer">
+                                <div class="relative inline-flex items-center">
                                     <input class="sr-only peer" type="checkbox"/>
                                     <div class="w-11 h-6 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-container shadow-inner"></div>
                                 </div>
-                            </div>
+                            </label>
                         </div>
                         <!-- Numeric Input -->
                         <div class="space-y-xs">
@@ -280,11 +280,9 @@
                     <div>
                         <h1 class="text-display-lg font-display-lg text-primary-fixed tracking-tight">Demand Intelligence <span class="text-secondary opacity-50">v4.2</span></h1>
                         <div class="flex gap-xs mt-sm">
-                            <span class="px-sm py-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> XGBoost Regressor (Active)
-                            </span>
-                            <span class="px-sm py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright cursor-pointer transition-colors">Random Forest</span>
-                            <span class="px-sm py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright cursor-pointer transition-colors">Baseline Linear</span>
+                            <span onclick="switchMLModel(this, 'XGBoost Regressor')" class="px-sm py-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-[0_0_10px_rgba(0,229,255,0.4)] cursor-pointer transition-all"><span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> XGBoost Regressor (Active)</span>
+                            <span onclick="switchMLModel(this, 'Random Forest')" class="px-sm py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright cursor-pointer transition-colors">Random Forest</span>
+                            <span onclick="switchMLModel(this, 'Baseline Linear')" class="px-sm py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright cursor-pointer transition-colors">Baseline Linear</span>
                         </div>
                     </div>
                     <!-- Top Right: Diagnostic Cards -->
@@ -330,8 +328,25 @@
                         <path d="M 500,200 L 550,180 L 600,220 L 650,150 L 700,190 L 750,140 L 800,160 L 850,100 L 900,130 L 950,80 L 950,140 L 900,180 L 850,160 L 800,210 L 750,190 L 700,240 L 650,200 L 600,270 L 550,230 L 500,250 Z" fill="rgba(0, 229, 255, 0.05)"></path>
                         <!-- Historical Data Line -->
                         <path d="M 50,300 L 100,280 L 150,310 L 200,250 L 250,270 L 300,210 L 350,240 L 400,180 L 450,220 L 500,170" fill="none" stroke="#dce4e5" stroke-linecap="round" stroke-width="2"></path>
-                        <!-- AI Predicted Line -->
-                        <path class="filter drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" d="M 500,170 L 550,150 L 600,190 L 650,120 L 700,160 L 750,110 L 800,130 L 850,70 L 900,100 L 950,50" fill="none" stroke="#00e5ff" stroke-linecap="round" stroke-width="3"></path>
+                        <!-- AI Predicted Line (Dotted with glowing nodes) -->
+                        <path class="predicted-line filter drop-shadow-[0_0_8px_rgba(0,229,255,0.8)]" stroke-dasharray="6,6" d="M 500,170 L 550,150 L 600,190 L 650,120 L 700,160 L 750,110 L 800,130 L 850,70 L 900,100 L 950,50" fill="none" stroke="#00e5ff" stroke-linecap="round" stroke-width="3"></path>
+                        <!-- Dotted Line Data Points (Dots) -->
+                        <circle class="predicted-dot" data-base-cy="170" cx="500" cy="170" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+0: 1,840 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="150" cx="550" cy="150" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+3: 1,910 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="190" cx="600" cy="190" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+6: 1,780 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="120" cx="650" cy="120" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+9: 2,050 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="160" cx="700" cy="160" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+12: 1,890 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="110" cx="750" cy="110" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+15: 2,120 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="130" cx="800" cy="130" r="5" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 6px #00e5ff);"><title>Horizon T+18: 2,040 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="70" cx="850" cy="70" r="6" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 8px #00e5ff);"><title>Horizon T+21: 2,340 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="100" cx="900" cy="100" r="6" fill="#00e5ff" stroke="#ffffff" stroke-width="2" style="cursor: pointer; filter: drop-shadow(0 0 8px #00e5ff);"><title>Horizon T+24: 2,210 TEUs</title></circle>
+                        <circle class="predicted-dot" data-base-cy="50" cx="950" cy="50" r="7" fill="#00e5ff" stroke="#ffffff" stroke-width="2.5" style="cursor: pointer; filter: drop-shadow(0 0 12px #00e5ff);"><title>Horizon T+30 Optimal Target: 2,680 TEUs</title></circle>
+                        <!-- Historical Data Dots -->
+                        <circle cx="50" cy="300" r="4" fill="#dce4e5" stroke="#080f11" stroke-width="1.5"><title>Q3-2023: 1,320 TEUs</title></circle>
+                        <circle cx="150" cy="310" r="4" fill="#dce4e5" stroke="#080f11" stroke-width="1.5"><title>Oct-2023: 1,290 TEUs</title></circle>
+                        <circle cx="250" cy="270" r="4" fill="#dce4e5" stroke="#080f11" stroke-width="1.5"><title>Dec-2023: 1,450 TEUs</title></circle>
+                        <circle cx="350" cy="240" r="4" fill="#dce4e5" stroke="#080f11" stroke-width="1.5"><title>Feb-2024: 1,580 TEUs</title></circle>
+                        <circle cx="450" cy="220" r="4.5" fill="#dce4e5" stroke="#080f11" stroke-width="1.5"><title>Apr-2024: 1,660 TEUs</title></circle>
                         <!-- Scanning vertical line (Interactive simulation) -->
                         <line stroke="#ff00ff" stroke-dasharray="4" stroke-width="1" x1="500" x2="500" y1="50" y2="350">
                             <animate attributeName="x1" dur="10s" repeatCount="indefinite" values="500;950;500"></animate>
@@ -416,8 +431,9 @@
 <!-- Micro-interactions Script -->
 
 
+
 <script>
-    // Restore ALL_SCREENS_HTML from sessionStorage if document.write wiped it previously
+    // Restore ALL_SCREENS_HTML from sessionStorage if needed
     if (!window.ALL_SCREENS_HTML) {
         try {
             const saved = sessionStorage.getItem('SAVED_SCREENS_HTML');
@@ -430,6 +446,89 @@
         } catch(e) {}
     }
 
+    // 1. Holiday & Monsoon Toggle Handler
+    function toggleHolidayMonsoon(labelEl, name) {
+        const checkbox = labelEl.querySelector('input[type="checkbox"]');
+        if (checkbox) {
+            checkbox.checked = !checkbox.checked;
+            const isChecked = checkbox.checked;
+            showToast(name + (isChecked ? ' Activated' : ' Deactivated'), 
+                      name + (isChecked ? ' surge active (+18.5% TEU weighting applied to forecast curve).' : ' normalized to baseline schedule.'));
+            
+            // Adjust SVG dots dynamically
+            const dots = document.querySelectorAll('svg circle.predicted-dot');
+            dots.forEach((dot, idx) => {
+                let cy = parseFloat(dot.getAttribute('data-base-cy') || dot.getAttribute('cy'));
+                if (!dot.getAttribute('data-base-cy')) dot.setAttribute('data-base-cy', cy);
+                let newCy = isChecked ? Math.max(20, cy - (idx * 4 + 10)) : cy;
+                dot.setAttribute('cy', newCy);
+            });
+            const path = document.querySelector('path.predicted-line');
+            if (path && dots.length > 0) {
+                let d = 'M ' + dots[0].getAttribute('cx') + ',' + dots[0].getAttribute('cy');
+                for (let i = 1; i < dots.length; i++) {
+                    d += ' L ' + dots[i].getAttribute('cx') + ',' + dots[i].getAttribute('cy');
+                }
+                path.setAttribute('d', d);
+            }
+        }
+    }
+
+    // 2. ML Model Selection Handler (Random Forest, XGBoost, Baseline)
+    function switchMLModel(spanEl, modelName) {
+        const container = spanEl.parentElement;
+        if (!container) return;
+        const allBadges = container.querySelectorAll('span');
+        allBadges.forEach(b => {
+            const txt = (b.innerText || b.textContent || '').trim();
+            if (txt.includes(modelName)) {
+                b.className = 'px-sm py-1 rounded-full bg-primary-container text-on-primary-container text-[10px] font-bold uppercase tracking-widest flex items-center gap-1 shadow-[0_0_10px_rgba(0,229,255,0.4)] cursor-pointer transition-all';
+                if (!b.querySelector('.animate-pulse')) {
+                    b.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> ' + modelName + ' (Active)';
+                }
+            } else {
+                let rawTxt = txt.replace(/\(Active\)/g, '').replace('•', '').trim();
+                b.className = 'px-sm py-1 rounded-full bg-surface-variant text-on-surface-variant text-[10px] font-bold uppercase tracking-widest hover:bg-surface-bright cursor-pointer transition-colors';
+                b.innerHTML = rawTxt;
+            }
+        });
+
+        // Update KPI cards based on model
+        const rmseEl = document.querySelector('.grid.grid-cols-2 p.font-mono-kpi');
+        if (modelName.includes('Random Forest')) {
+            showToast('Random Forest Ensemble Active', '30-day decision tree bagging retrained (`RMSE: 0.781`, `R²: 0.992`).');
+            if (rmseEl) rmseEl.innerText = '0.781';
+        } else if (modelName.includes('Baseline')) {
+            showToast('Baseline Linear Regression Active', 'Simple OLS trendline loaded (`RMSE: 1.412`, `R²: 0.914`).');
+            if (rmseEl) rmseEl.innerText = '1.412';
+        } else {
+            showToast('XGBoost Multi-Horizon Active', 'Gradient boosted trees retrained across Rotterdam Hub (`RMSE: 0.842`, `R²: 0.999`).');
+            if (rmseEl) rmseEl.innerText = '0.842';
+        }
+    }
+
+    // 3. Slider Value Live Scale Update
+    function updateSliderValue(rangeEl) {
+        const parent = rangeEl.closest('.space-y-xs') || rangeEl.parentElement;
+        if (!parent) return;
+        const valSpan = parent.querySelector('span.text-primary-fixed-dim, span.font-mono-label, span.font-bold');
+        if (valSpan) {
+            let val = rangeEl.value;
+            if (valSpan.innerText.includes('%')) {
+                valSpan.innerText = val + '%';
+            } else if (valSpan.innerText.includes('₹') || valSpan.innerText.includes('$')) {
+                valSpan.innerText = '₹ ' + val;
+            } else if (valSpan.innerText.includes('.')) {
+                valSpan.innerText = parseFloat(val).toFixed(1);
+            } else {
+                valSpan.innerText = val + '.0';
+            }
+        }
+        // If this is Sales Index or Promo discount, trigger subtle curve shift feedback
+        showToast('Scale Adjusted: ' + rangeEl.value, 'Recalculating container volume allocation sensitivity...');
+    }
+
+    // 4. Sidebar Highlights & Navigation
     function updateSidebarHighlight(activeText) {
         const links = document.querySelectorAll('aside a, aside button.nav-link');
         links.forEach(a => {
@@ -449,14 +548,41 @@
     function switchMainScreen(targetScreen, viewMode) {
         if (viewMode === 'cost') {
             updateSidebarHighlight('Cost Analytics');
+            // Check if we are on dashboard_preview.html right now
+            if (!document.getElementById('drawer-table-routes') && window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML['dashboard_preview.html']) {
+                try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e){}
+                document.open();
+                document.write(window.ALL_SCREENS_HTML['dashboard_preview.html']);
+                document.close();
+                setTimeout(() => {
+                    const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
+                    if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    if (typeof switchDrawerTab === 'function') switchDrawerTab('routes');
+                    showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown: ₹ 6,600 Optimal vs ₹ 19,800 Baseline (66.6% Savings).');
+                }, 100);
+                return false;
+            }
             const costEl = document.querySelector('.mt-lg.pt-md.border-t') || document.querySelector('main');
             if (costEl) costEl.scrollIntoView({behavior: 'smooth', block: 'center'});
             if (typeof switchDrawerTab === 'function') switchDrawerTab('routes');
-            showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown ($1,425,800 vs $2,180,000 baseline).');
+            showToast('Cost Analytics Active', 'Inspecting SCIP MILP freight cost breakdown: ₹ 6,600 Optimal vs ₹ 19,800 Baseline (66.6% Savings).');
             return false;
         }
         if (viewMode === 'audit') {
             updateSidebarHighlight('Audit Logs');
+            if (!document.getElementById('drawer-table-sql') && window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML['dashboard_preview.html']) {
+                try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e){}
+                document.open();
+                document.write(window.ALL_SCREENS_HTML['dashboard_preview.html']);
+                document.close();
+                setTimeout(() => {
+                    if (typeof switchDrawerTab === 'function') switchDrawerTab('sql');
+                    const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
+                    if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    showToast('3NF Audit Logs Active', 'Inspecting real-time ACID transaction audit trail (0.42ms average sync latency).');
+                }, 100);
+                return false;
+            }
             if (typeof switchDrawerTab === 'function') switchDrawerTab('sql');
             const drawerEl = document.getElementById('drawer-table-sql') || document.querySelector('.glass-panel.rounded-xl.overflow-hidden');
             if (drawerEl) drawerEl.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -464,18 +590,14 @@
             return false;
         }
 
-        // For topology, forecaster, and cvrp: instantly switch the single-page view without hiding the dashboard!
         if (window.ALL_SCREENS_HTML && window.ALL_SCREENS_HTML[targetScreen]) {
-            try {
-                sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML));
-            } catch(e) {}
+            try { sessionStorage.setItem('SAVED_SCREENS_HTML', JSON.stringify(window.ALL_SCREENS_HTML)); } catch(e) {}
             document.open();
             document.write(window.ALL_SCREENS_HTML[targetScreen]);
             document.close();
             return false;
         }
 
-        // Try switching parent Streamlit tab if inside Streamlit
         try {
             if (window.parent && window.parent.document) {
                 const labels = window.parent.document.querySelectorAll('div[role="radiogroup"] label, label[data-baseweb="radio"], p, span, div[data-testid="stRadio"] label, button[role="tab"]');
@@ -496,9 +618,7 @@
             }
         } catch(e) {}
 
-        try {
-            window.location.href = targetScreen;
-        } catch(e) {}
+        try { window.location.href = targetScreen; } catch(e) {}
         return false;
     }
 
@@ -528,24 +648,20 @@
                 el.className = 'bg-surface-variant/40 hover:bg-surface-variant/60 text-xs px-xs py-1 rounded border border-outline-variant/30 text-on-surface-variant transition-all';
             }
         }
-        
         const gMilp = document.getElementById('map-group-milp');
         const gCvrp = document.getElementById('map-group-cvrp');
         const gHeat = document.getElementById('map-group-heat');
         if (gMilp) gMilp.classList.add('hidden');
         if (gCvrp) gCvrp.classList.add('hidden');
         if (gHeat) gHeat.classList.add('hidden');
-        
         const target = document.getElementById('map-group-' + mode);
         if (target) target.classList.remove('hidden');
-
         showToast('Map Mode Switched', 'Displaying active ' + mode.toUpperCase() + ' network layer.');
     }
 
     function switchDrawerTab(tabName) {
         const tabs = {'routes': 'tab-btn-routes', 'ai': 'tab-btn-ai', 'sql': 'tab-btn-sql'};
         const contents = {'routes': 'drawer-table-routes', 'ai': 'drawer-table-ai', 'sql': 'drawer-table-sql'};
-        
         for (let k in tabs) {
             const btn = document.getElementById(tabs[k]);
             if (btn) {
@@ -594,7 +710,6 @@
             btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Computing Global Optimum...';
             btn.disabled = true;
         }
-
         setTimeout(() => {
             closeNewOptimizationModal();
             if (btn) {
