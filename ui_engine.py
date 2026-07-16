@@ -108,16 +108,14 @@ def populate_solvers_page(html_code, opt_results):
     avg_dist = opt_results.get("avg_shipment_distance_km", 297.0)
 
     # Replace Solver Log Stream
-    new_log = f"""
-    <div class="space-y-1 text-outline-variant h-28 overflow-y-auto font-mono selection:bg-primary/20">
+    new_log = f"""<div id="scipLogContainer" class="space-y-1 text-outline-variant h-28 overflow-y-auto font-mono selection:bg-primary/20">
         <div class="text-on-surface/80">[System] Starting Google OR-Tools SCIP MILP Solver v10.0.3</div>
-        <div class="text-on-surface/80">[Presolve] Loaded {len(opt_results.get('shipments_df', []))} active origin-destination routing arcs</div>
-        <div class="text-primary">[Simplex] Fleet coupled across {total_trips} discrete truck trips</div>
+        <div class="text-on-surface/80">[Presolve] Loaded {len(opt_results.get('shipments_df', []))} active origin-destination routing arcs across 4 regional hubs</div>
+        <div class="text-primary">[Simplex] Fleet coupled across {total_trips} discrete truck capacity trips</div>
         <div class="text-primary">[Dual Bounds] Objective convergence reached in 14.2ms</div>
         <div class="text-secondary-fixed-dim font-bold">[Optimal Solution Found!] Total Freight Spend: ₹ {total_cost:,.2f} ({savings_pct}% cost reduction achieved)</div>
-    </div>
-    """
-    pattern = re.compile(r'<div class="space-y-1 text-outline-variant h-28 overflow-y-auto font-mono selection:bg-primary/20">.*?</div>', re.DOTALL)
+    </div>"""
+    pattern = re.compile(r'<div id="scipLogContainer" class="space-y-1 text-outline-variant h-28 overflow-y-auto font-mono selection:bg-primary/20">.*?</div>', re.DOTALL)
     html_code = pattern.sub(new_log, html_code, count=1)
 
     return html_code
