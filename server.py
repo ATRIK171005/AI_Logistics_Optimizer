@@ -60,6 +60,11 @@ async def read_root():
 async def read_login():
     return FileResponse("login.html")
 
+@app.get("/signup.html", response_class=HTMLResponse)
+@app.get("/create_team.html", response_class=HTMLResponse)
+async def read_signup():
+    return FileResponse("signup.html")
+
 @app.get("/overview.html", response_class=HTMLResponse)
 async def read_overview():
     # Make sure overview.html is synced with latest data before serving
