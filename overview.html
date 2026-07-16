@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Command Center | LogisticsOptimizer AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-on-surface": "#2d3133",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "surface-bright": "#363a3b",
+                        "on-secondary-fixed": "#002022",
+                        "on-tertiary": "#2d3039",
+                        "on-surface-variant": "#c3c6d7",
+                        "surface-container-lowest": "#0b0f10",
+                        "surface-container-high": "#272a2c",
+                        "tertiary-fixed": "#e0e2ee",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#101415",
+                        "surface-container": "#1d2022",
+                        "surface-tint": "#b4c5ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "primary-container": "#2563eb",
+                        "primary": "#b4c5ff",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "surface-variant": "#323537",
+                        "inverse-surface": "#e0e3e5",
+                        "surface-container-highest": "#323537",
+                        "outline": "#8d90a0",
+                        "outline-variant": "#434655",
+                        "inverse-primary": "#0053db",
+                        "tertiary-container": "#6a6d77",
+                        "secondary-fixed-dim": "#00dbe9",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "on-surface": "#e0e3e5",
+                        "on-primary": "#002a78",
+                        "secondary-fixed": "#7df4ff",
+                        "secondary": "#d3fbff",
+                        "tertiary": "#c4c6d2",
+                        "surface-container-low": "#191c1e",
+                        "on-background": "#e0e3e5",
+                        "tertiary-fixed-dim": "#c4c6d2",
+                        "on-tertiary-fixed": "#181b24",
+                        "on-tertiary-container": "#eef0fc",
+                        "error-container": "#93000a",
+                        "secondary-container": "#00eefc",
+                        "on-primary-container": "#eeefff",
+                        "surface": "#101415",
+                        "on-primary-fixed": "#00174b",
+                        "background": "#101415",
+                        "on-tertiary-fixed-variant": "#444650",
+                        "on-secondary": "#00363a",
+                        "on-secondary-container": "#00686f",
+                        "primary-fixed": "#dbe1ff"
+                    },
+                    "fontFamily": {
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Outfit"],
+                        "body-lg": ["Outfit"],
+                        "headline-lg": ["Outfit"],
+                        "code-sm": ["JetBrains Mono"],
+                        "display-xl-mobile": ["Outfit"],
+                        "body-md": ["Outfit"],
+                        "display-xl": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "code-sm": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "display-xl-mobile": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "margin-desktop": "80px",
+                        "max-width": "1280px",
+                        "unit": "4px",
+                        "gutter": "24px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #101415;
+            color: #e0e3e5;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glow-sapphire {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 15px rgba(0, 219, 233, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(180, 197, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md">
+<!-- Top Navigation Shell -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+<div class="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
+<a href="overview.html" class="flex items-center gap-2">
+<div class="w-8 h-8 bg-primary rounded flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-xl">hub</span>
+</div>
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim tracking-tight">LogisticsOptimizer AI</span>
+</a>
+<div class="hidden md:flex items-center gap-8">
+<a class="text-secondary-fixed-dim font-bold border-b-2 border-secondary-fixed-dim pb-1" href="overview.html">Command Center</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="architecture.html">Architecture</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="solvers.html">Solvers</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="forecasting.html">ML Forecaster</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="analytics.html">Analytics</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-white/5 p-2 rounded-full cursor-pointer transition-all">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant hover:bg-white/5 p-2 rounded-full cursor-pointer transition-all">settings</span>
+<a href="login.html" title="Switch User / Sign Out" class="w-8 h-8 rounded-full bg-surface-variant border border-white/10 overflow-hidden block">
+<img class="w-full h-full object-cover" data-alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1YMcG64-aTNQd8te32UJwvBs21v1X1dq0IXByPnSH4O4he9oXWFiB_fEg5dF8hmgQWLoWyIzUy0DsOF1Wx4zhKlM8MZyi6Q6sIECVCEfCmM98GXLdrhHoeHdSP0box0ut2VUFbqgekUXSIjoiN5-vO7-BUSOZ_V-cujJdVObv7FIdGfm0oOaBrkt-hi6vluRb8sv97p8jxsU_uFcvFz0ZXrYQjikRf56657aUF1U4jBUJkQmA7pQX"/>
+</a>
+</div>
+</div>
+</nav>
+<!-- Side Navigation Shell -->
+<aside class="hidden lg:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] h-screen w-64 border-r border-white/5 bg-surface-container-lowest">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></div>
+<div>
+<div class="font-headline-lg text-headline-lg text-on-surface text-sm">Optimizer v4.2</div>
+<div class="text-[10px] text-outline-variant font-label-caps">Enterprise Tier</div>
+</div>
+</div>
+<nav class="space-y-2">
+<a class="bg-primary-container/20 text-secondary-fixed-dim border-r-4 border-secondary-fixed-dim flex items-center gap-3 px-4 py-3 transition-all" href="overview.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Overview</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-all" href="architecture.html">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-all" href="solvers.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">OR Solvers</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-all" href="forecasting.html">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps">Forecasting</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-all" href="analytics.html">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">KPI SQL</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 border-t border-white/5">
+<button onclick="alert('Deploying updated MILP & VRP model to local edge node... Complete.')" class="w-full bg-primary-container text-on-primary-container py-3 rounded-lg font-bold flex items-center justify-center gap-2 active:scale-95 transition-transform hover:shadow-[0_0_15px_rgba(37,99,235,0.4)]">
+<span class="material-symbols-outlined text-sm">rocket_launch</span>
+                Deploy Model
+            </button>
+<div class="mt-6 space-y-2">
+<a class="text-outline-variant flex items-center gap-3 px-2 py-1 text-xs hover:text-on-surface transition-colors" href="https://github.com/ATRIK171005/AI_Logistics_Optimizer" target="_blank">
+<span class="material-symbols-outlined text-sm">menu_book</span>
+                    Documentation
+                </a>
+<a class="text-outline-variant flex items-center gap-3 px-2 py-1 text-xs hover:text-on-surface transition-colors" href="login.html">
+<span class="material-symbols-outlined text-sm">support_agent</span>
+                    Sign Out
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-20 px-margin-mobile md:px-margin-desktop pb-12 max-w-max-width mx-auto">
+<!-- Executive KPI Bar -->
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-primary/20 transition-all"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline-variant">Total Savings</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim">payments</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">₹ 0.1 Lakhs</div>
+<div class="text-secondary-fixed-dim text-sm mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-xs">trending_up</span>
+                    +12.4% vs last month
+                </div>
+</div>
+<div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-secondary-fixed-dim/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-secondary-fixed-dim/20 transition-all"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline-variant">Fleet Utilization</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim">local_shipping</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">94%</div>
+<div class="w-full bg-white/10 h-1 mt-4 rounded-full overflow-hidden">
+<div class="bg-gradient-to-r from-primary to-secondary-fixed-dim h-full w-[94%]"></div>
+</div>
+</div>
+<div class="glass-panel rounded-xl p-6 relative overflow-hidden group">
+<div class="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-3xl -mr-10 -mt-10 group-hover:bg-primary/20 transition-all"></div>
+<div class="flex justify-between items-start mb-4">
+<span class="font-label-caps text-label-caps text-outline-variant">Avg Distance</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim">route</span>
+</div>
+<div class="font-headline-lg text-headline-lg text-on-surface font-bold">297km</div>
+<div class="text-outline text-sm mt-2 flex items-center gap-1 font-code-sm">
+<span class="material-symbols-outlined text-xs">info</span>
+                    Optimized from 340km base
+                </div>
+</div>
+</section>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+<!-- Active Network Health Map -->
+<section class="xl:col-span-8">
+<div class="glass-panel rounded-xl p-0 h-[600px] relative overflow-hidden group">
+<div class="absolute top-6 left-6 z-10">
+<div class="flex items-center gap-3 glass-panel px-4 py-2 rounded-full border-white/20">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-ping"></span>
+<span class="font-label-caps text-label-caps">Network Health: Optimal</span>
+</div>
+</div>
+<div class="w-full h-full grayscale opacity-50 contrast-125 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBiyw9g3iAWIko6p2wp9XbNxlGIov7-4gRE43GPquAvEFIPIVB2Q8cIk3zJ_XgOBtl3eKYR35HtAXXggVcGrW_VFmOXx_4GLN-XsCvz5YfaGEsmEzSNtUaJ703zRV9EOFV9x2YXZ-mm67_VUgoeLMQYDa13p2c04ZJwlcNxwKQ3QAkR9qSJeIjIxNBzmPUq8wD8nL3m9lk1ZpIdht-Q-AZYMNjPlzvm63Nzo4Gg-bt3ZekJGZRVNLzX')"></div>
+<!-- Decorative overlay nodes -->
+<div class="absolute top-[30%] left-[20%] w-3 h-3 bg-secondary-fixed-dim rounded-full glow-emerald"></div>
+<div class="absolute top-[45%] left-[45%] w-3 h-3 bg-secondary-fixed-dim rounded-full glow-emerald"></div>
+<div class="absolute top-[55%] left-[75%] w-3 h-3 bg-secondary-fixed-dim rounded-full glow-emerald"></div>
+<div class="absolute bottom-6 left-6 right-6 flex justify-between items-end">
+<div class="glass-panel p-4 rounded-lg border-white/20 max-w-xs">
+<div class="text-[10px] font-label-caps text-outline mb-2 uppercase">Live Traffic Log</div>
+<div class="font-code-sm text-[11px] text-primary/80 space-y-1">
+<div>[14:20:01] Route_ID: 9822 Re-optimized</div>
+<div>[14:20:05] HUB_BERLIN Latency: 4ms</div>
+<div>[14:20:09] Solver convergence: 99.8%</div>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="w-10 h-10 glass-panel rounded-lg flex items-center justify-center hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined">add</span>
+</button>
+<button class="w-10 h-10 glass-panel rounded-lg flex items-center justify-center hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined">remove</span>
+</button>
+<button class="w-10 h-10 glass-panel rounded-lg flex items-center justify-center hover:bg-white/10 transition-all">
+<span class="material-symbols-outlined">layers</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Sidebar: Status & Actions -->
+<aside class="xl:col-span-4 space-y-8">
+<!-- Live Optimization Status -->
+<div class="glass-panel rounded-xl p-6">
+<h3 class="font-headline-md text-sm uppercase tracking-wider text-on-surface-variant mb-6 border-b border-white/5 pb-2">Solver Engine Status</h3>
+<div class="space-y-6">
+<div class="flex justify-between items-center">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary-fixed-dim">memory</span>
+</div>
+<div>
+<div class="font-label-caps text-xs">Google OR-Tools SCIP</div>
+<div class="text-[11px] text-outline">v10.0.3 Internal</div>
+</div>
+</div>
+<span class="text-secondary-fixed-dim font-bold text-xs uppercase">Active</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between text-xs mb-2">
+<span class="text-outline">Optimality Gap</span>
+<span class="font-code-sm text-primary">0.12%</span>
+</div>
+<div class="w-full bg-white/5 h-1 rounded-full">
+<div class="bg-primary h-full w-[99%]"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between text-xs mb-2">
+<span class="text-outline">Compute Load</span>
+<span class="font-code-sm text-secondary-fixed-dim">42.8 GFLOPS</span>
+</div>
+<div class="w-full bg-white/5 h-1 rounded-full">
+<div class="bg-secondary-fixed-dim h-full w-[65%]"></div>
+</div>
+</div>
+</div>
+<div class="pt-4 border-t border-white/5 flex gap-4">
+<div class="flex-1 text-center p-3 bg-white/5 rounded-lg">
+<div class="text-[10px] font-label-caps text-outline uppercase mb-1">Iterations</div>
+<div class="font-code-sm text-sm">1.2M</div>
+</div>
+<div class="flex-1 text-center p-3 bg-white/5 rounded-lg">
+<div class="text-[10px] font-label-caps text-outline uppercase mb-1">Variables</div>
+<div class="font-code-sm text-sm">450k</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Center -->
+<div class="glass-panel rounded-xl p-6">
+<h3 class="font-headline-md text-sm uppercase tracking-wider text-on-surface-variant mb-6 border-b border-white/5 pb-2">Action Center</h3>
+<div class="grid grid-cols-1 gap-3">
+<a href="solvers.html" class="flex items-center gap-4 p-4 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 transition-all group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">bolt</span>
+<div class="text-left">
+<div class="text-sm font-bold">Run New Optimization</div>
+<div class="text-[11px] text-outline">Execute full network scan</div>
+</div>
+</a>
+<a href="analytics.html" class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 transition-all group">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary-fixed-dim transition-colors">download</span>
+<div class="text-left">
+<div class="text-sm font-bold">Export Reports</div>
+<div class="text-[11px] text-outline">PDF, CSV, and JSON formats</div>
+</div>
+</a>
+<a href="architecture.html" class="flex items-center gap-4 p-4 rounded-xl border border-white/5 hover:bg-white/5 transition-all group">
+<span class="material-symbols-outlined text-outline group-hover:text-secondary-fixed-dim transition-colors">settings_input_component</span>
+<div class="text-left">
+<div class="text-sm font-bold">Manage Nodes</div>
+<div class="text-[11px] text-outline">Adjust facility parameters</div>
+</div>
+</a>
+</div>
+</div>
+</aside>
+</div>
+<!-- Recent Optimization History -->
+<section class="mt-12 glass-panel rounded-xl overflow-hidden">
+<div class="px-8 py-6 border-b border-white/5 flex justify-between items-center">
+<h3 class="font-headline-md text-lg text-on-surface">Recent Optimization History</h3>
+<a href="analytics.html" class="text-xs font-label-caps text-primary hover:underline transition-all">View All History</a>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-high/50">
+<th class="px-8 py-4 font-label-caps text-[11px] text-outline uppercase">Run ID</th>
+<th class="px-8 py-4 font-label-caps text-[11px] text-outline uppercase">Timestamp</th>
+<th class="px-8 py-4 font-label-caps text-[11px] text-outline uppercase">Solver Status</th>
+<th class="px-8 py-4 font-label-caps text-[11px] text-outline uppercase text-right">Cost Reduction</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5 font-code-sm text-sm">
+            <tr class="hover:bg-white/5 transition-colors cursor-pointer group">
+                <td class="px-8 py-5 text-primary">OPT-2024-X99 (Mumbai &rarr; Pune)</td>
+                <td class="px-8 py-5 text-outline">Live SCIP Run #1</td>
+                <td class="px-8 py-5">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+                        Converged (200 TEUs)
+                    </span>
+                </td>
+                <td class="px-8 py-5 text-right font-bold text-secondary-fixed-dim">₹ 1,000</td>
+            </tr>
+            
+            <tr class="hover:bg-white/5 transition-colors cursor-pointer group">
+                <td class="px-8 py-5 text-primary">OPT-2024-X98 (Chennai &rarr; Bangalore)</td>
+                <td class="px-8 py-5 text-outline">Live SCIP Run #2</td>
+                <td class="px-8 py-5">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+                        Converged (250 TEUs)
+                    </span>
+                </td>
+                <td class="px-8 py-5 text-right font-bold text-secondary-fixed-dim">₹ 1,500</td>
+            </tr>
+            
+            <tr class="hover:bg-white/5 transition-colors cursor-pointer group">
+                <td class="px-8 py-5 text-primary">OPT-2024-X97 (Chennai &rarr; Hyderabad)</td>
+                <td class="px-8 py-5 text-outline">Live SCIP Run #3</td>
+                <td class="px-8 py-5">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+                        Converged (220 TEUs)
+                    </span>
+                </td>
+                <td class="px-8 py-5 text-right font-bold text-secondary-fixed-dim">₹ 1,760</td>
+            </tr>
+            
+            <tr class="hover:bg-white/5 transition-colors cursor-pointer group">
+                <td class="px-8 py-5 text-primary">OPT-2024-X96 (Delhi &rarr; Jaipur)</td>
+                <td class="px-8 py-5 text-outline">Live SCIP Run #4</td>
+                <td class="px-8 py-5">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+                        Converged (150 TEUs)
+                    </span>
+                </td>
+                <td class="px-8 py-5 text-right font-bold text-secondary-fixed-dim">₹ 900</td>
+            </tr>
+            
+            <tr class="hover:bg-white/5 transition-colors cursor-pointer group">
+                <td class="px-8 py-5 text-primary">OPT-2024-X95 (Delhi &rarr; Lucknow)</td>
+                <td class="px-8 py-5 text-outline">Live SCIP Run #5</td>
+                <td class="px-8 py-5">
+                    <span class="flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-secondary-fixed-dim"></span>
+                        Converged (180 TEUs)
+                    </span>
+                </td>
+                <td class="px-8 py-5 text-right font-bold text-secondary-fixed-dim">₹ 1,440</td>
+            </tr>
+            </tbody>
+</table>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-white/5 bg-surface-container-lowest py-6">
+<div class="flex justify-between items-center px-margin-desktop max-w-max-width mx-auto">
+<div class="font-code-sm text-code-sm text-on-surface-variant opacity-60">
+                © 2024 AI Logistics Corp. Internal Use Only.
+            </div>
+<div class="flex gap-8">
+<a class="font-code-sm text-code-sm text-outline hover:text-secondary-fixed-dim transition-colors" href="#">Security</a>
+<a class="font-code-sm text-code-sm text-outline hover:text-secondary-fixed-dim transition-colors" href="#">API Docs</a>
+<a class="font-code-sm text-code-sm text-outline hover:text-secondary-fixed-dim transition-colors" href="#">Service Status</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for live updates simulation
+        setInterval(() => {
+            const timeElements = document.querySelectorAll('.font-code-sm div');
+            if (timeElements.length > 0) {
+                const now = new Date();
+                const timeStr = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+                const logs = [
+                    "Route_ID: " + Math.floor(Math.random() * 9000 + 1000) + " Re-optimized",
+                    "HUB_DATA Sync: OK",
+                    "Solver GAP: " + (Math.random() * 0.2).toFixed(2) + "%",
+                    "Computing trajectory..."
+                ];
+                const randomLog = logs[Math.floor(Math.random() * logs.length)];
+                
+                const logContainer = document.querySelector('.font-code-sm');
+                if (logContainer) {
+                    const newEntry = document.createElement('div');
+                    newEntry.textContent = `${timeStr} ${randomLog}`;
+                    newEntry.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                    logContainer.prepend(newEntry);
+                    setTimeout(() => newEntry.classList.remove('opacity-0'), 10);
+                    if (logContainer.children.length > 5) {
+                        logContainer.lastElementChild.remove();
+                    }
+                }
+            }
+        }, 3000);
+    </script>
+
+    <!-- SPA_INTERCEPTOR -->
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        if (window.ALL_SCREENS_HTML) {
+          document.querySelectorAll('a[href]').forEach(a => {
+            const href = a.getAttribute('href');
+            if (href && window.ALL_SCREENS_HTML[href]) {
+              a.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.open();
+                document.write(window.ALL_SCREENS_HTML[href].replace('<head>', '<head><script>window.ALL_SCREENS_HTML = ' + JSON.stringify(window.ALL_SCREENS_HTML) + ';<\/script>'));
+                document.close();
+              });
+            }
+          });
+        }
+      });
+    </script>
+    
+</body>
+</html>

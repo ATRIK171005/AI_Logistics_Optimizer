@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>KPIs & SQL Analytics | LogisticsOptimizer AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#b4c5ff",
+                        "primary-container": "#2563eb",
+                        "on-primary": "#002a78",
+                        "on-primary-container": "#eeefff",
+                        "secondary": "#d3fbff",
+                        "secondary-container": "#00eefc",
+                        "on-secondary": "#00363a",
+                        "on-secondary-container": "#00686f",
+                        "tertiary": "#c4c6d2",
+                        "tertiary-container": "#6a6d77",
+                        "on-tertiary": "#2d3039",
+                        "on-tertiary-container": "#eef0fc",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "background": "#101415",
+                        "on-background": "#e0e3e5",
+                        "surface": "#101415",
+                        "on-surface": "#e0e3e5",
+                        "surface-variant": "#323537",
+                        "on-surface-variant": "#c3c6d7",
+                        "outline": "#8d90a0",
+                        "outline-variant": "#434655",
+                        "inverse-surface": "#e0e3e5",
+                        "inverse-on-surface": "#2d3133",
+                        "inverse-primary": "#0053db",
+                        "surface-dim": "#101415",
+                        "surface-bright": "#363a3b",
+                        "surface-container-lowest": "#0b0f10",
+                        "surface-container-low": "#191c1e",
+                        "surface-container": "#1d2022",
+                        "surface-container-high": "#272a2c",
+                        "surface-container-highest": "#323537",
+                        "primary-fixed": "#dbe1ff",
+                        "primary-fixed-dim": "#b4c5ff",
+                        "on-primary-fixed": "#00174b",
+                        "on-primary-fixed-variant": "#003ea8",
+                        "secondary-fixed": "#7df4ff",
+                        "secondary-fixed-dim": "#00dbe9",
+                        "on-secondary-fixed": "#002022",
+                        "on-secondary-fixed-variant": "#004f54",
+                        "tertiary-fixed": "#e0e2ee",
+                        "tertiary-fixed-dim": "#c4c6d2",
+                        "on-tertiary-fixed": "#181b24",
+                        "on-tertiary-fixed-variant": "#444650"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Outfit"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-xl-mobile": ["Outfit"],
+                        "body-md": ["Outfit"],
+                        "code-sm": ["JetBrains Mono"],
+                        "body-lg": ["Outfit"],
+                        "headline-md": ["Outfit"],
+                        "display-xl": ["Outfit"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                        "display-xl-mobile": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "code-sm": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                        "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    },
+                    "spacing": {
+                        "margin-mobile": "20px",
+                        "margin-desktop": "80px",
+                        "max-width": "1280px",
+                        "unit": "4px",
+                        "gutter": "24px"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #101415;
+            color: #e0e3e5;
+        }
+        .glass-panel {
+            background: rgba(29, 32, 34, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .sql-editor {
+            font-family: 'JetBrains Mono', monospace;
+            background: #0b0f10;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="font-body-md min-h-screen flex flex-col bg-background selection:bg-primary-container selection:text-white overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 right-0 h-16 bg-surface/80 backdrop-blur-md border-b border-white/10 z-50 px-margin-mobile md:px-margin-desktop flex items-center justify-between">
+<div class="flex items-center gap-3">
+<a href="overview.html" class="flex items-center gap-2">
+<div class="w-8 h-8 rounded bg-primary-container flex items-center justify-center font-bold text-white tracking-tighter">SQL</div>
+<span class="font-headline-md text-xl tracking-tight text-on-surface font-semibold">LogisticsOptimizer AI</span>
+</a>
+</div>
+<nav class="hidden md:flex items-center gap-8 font-code-sm text-sm">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="overview.html">Command Center</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="architecture.html">Architecture</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="solvers.html">Solvers</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="forecasting.html">ML Forecaster</a>
+<a class="text-secondary-fixed-dim font-bold border-b-2 border-secondary-fixed-dim pb-1" href="analytics.html">Analytics</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-white/5 p-2 rounded-full transition-all">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-white/5 p-2 rounded-full transition-all">settings</span>
+<a href="login.html" title="Switch User / Sign Out" class="w-8 h-8 rounded-full bg-surface-variant border border-white/10 overflow-hidden flex items-center justify-center">
+<span class="material-symbols-outlined text-sm">person</span>
+</a>
+</div>
+</header>
+<div class="flex flex-1 pt-16">
+<!-- Side Navigation -->
+<aside class="hidden lg:flex flex-col w-64 border-r border-white/5 bg-surface-container-lowest p-6 justify-between fixed top-16 bottom-0 left-0 z-40">
+<div class="space-y-8">
+<div>
+<div class="font-headline-lg text-sm tracking-wider text-on-surface uppercase font-bold mb-1">Optimizer v4.2</div>
+<div class="font-label-caps text-xs text-outline-variant">Enterprise Tier</div>
+</div>
+<nav class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-white/5 transition-all" href="overview.html">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="font-code-sm text-sm">Overview</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-white/5 transition-all" href="architecture.html">
+<span class="material-symbols-outlined text-[20px]">account_tree</span>
+<span class="font-code-sm text-sm">Architecture</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-white/5 transition-all" href="solvers.html">
+<span class="material-symbols-outlined text-[20px]">analytics</span>
+<span class="font-code-sm text-sm">OR Solvers</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-on-surface-variant hover:bg-white/5 transition-all" href="forecasting.html">
+<span class="material-symbols-outlined text-[20px]">query_stats</span>
+<span class="font-code-sm text-sm">Forecasting</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-primary-container/20 text-secondary-fixed-dim border-r-4 border-secondary-fixed-dim font-medium" href="analytics.html">
+<span class="material-symbols-outlined text-[20px]">database</span>
+<span class="font-code-sm text-sm">KPI SQL</span>
+</a>
+</nav>
+</div>
+<div class="space-y-4">
+<button onclick="alert('Deploying updated MILP & VRP model to local edge node... Complete.')" class="w-full py-3 px-4 rounded-xl bg-primary-container text-on-primary-container font-code-sm font-semibold hover:bg-blue-600 transition-colors shadow-lg shadow-primary-container/20">
+                Deploy Model
+            </button>
+<div class="pt-4 border-t border-white/5 space-y-2">
+<a class="flex items-center gap-2 text-xs text-outline hover:text-on-surface transition-colors" href="https://github.com/ATRIK171005/AI_Logistics_Optimizer" target="_blank">
+<span class="material-symbols-outlined text-[16px]">menu_book</span>
+                    Documentation
+                </a>
+<a class="flex items-center gap-2 text-xs text-outline hover:text-on-surface transition-colors" href="login.html">
+<span class="material-symbols-outlined text-[16px]">support_agent</span>
+                    Sign Out
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 lg:pl-64 p-margin-mobile md:p-margin-desktop max-w-max-width mx-auto w-full">
+<!-- Page Header -->
+<div class="mb-8">
+<div class="flex items-center gap-2 text-secondary-fixed-dim font-code-sm text-xs uppercase tracking-widest mb-2">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim animate-pulse"></span>
+                Storage & Query Engine
+            </div>
+<h1 class="font-display-xl-mobile md:font-display-xl text-4xl md:text-5xl font-bold tracking-tight text-on-surface mb-3">Enterprise KPI Analytics & SQL Studio</h1>
+<p class="font-body-lg text-on-surface-variant max-w-3xl">Execute ad-hoc analytical queries across historical optimization logs, route efficiency records, and real-time facility telemetry.</p>
+</div>
+<!-- SQL Query Studio Section -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-12">
+<!-- Query Editor -->
+<div class="lg:col-span-12 glass-panel rounded-xl overflow-hidden border border-white/10">
+<div class="bg-surface-container-low px-6 py-4 border-b border-white/10 flex justify-between items-center">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<span class="font-code-sm text-sm font-bold text-on-surface">SQLite Analytics Terminal</span>
+<span class="bg-green-500/10 text-green-400 text-[10px] font-code-sm px-2 py-0.5 rounded border border-green-500/20">3NF Schema Connected</span>
+</div>
+<div class="flex gap-3">
+<button onclick="runQuery()" class="px-4 py-2 bg-primary-container hover:bg-blue-600 text-white font-code-sm text-xs rounded-lg flex items-center gap-1.5 transition-all shadow-md">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span> Execute Query (Ctrl+Enter)
+                    </button>
+</div>
+</div>
+<!-- Code Editor Area -->
+<div class="sql-editor p-6 text-sm relative">
+<pre class="text-on-surface font-mono leading-relaxed overflow-x-auto"><span class="text-primary font-bold">SELECT</span> 
+    hub.facility_code,
+    hub.region_name,
+    <span class="text-secondary-fixed-dim">COUNT</span>(opt.run_id) <span class="text-primary font-bold">AS</span> total_optimizations,
+    <span class="text-secondary-fixed-dim">ROUND</span>(<span class="text-secondary-fixed-dim">AVG</span>(opt.cost_savings_pct), <span class="text-yellow-400">2</span>) <span class="text-primary font-bold">AS</span> avg_savings_percentage,
+    <span class="text-secondary-fixed-dim">SUM</span>(opt.distance_saved_km) <span class="text-primary font-bold">AS</span> cumulative_km_saved
+<span class="text-primary font-bold">FROM</span> logistics_hubs hub
+<span class="text-primary font-bold">JOIN</span> optimization_history opt <span class="text-primary font-bold">ON</span> hub.hub_id = opt.hub_id
+<span class="text-primary font-bold">WHERE</span> opt.created_at &gt;= <span class="text-green-400">'2024-01-01'</span>
+<span class="text-primary font-bold">GROUP BY</span> hub.facility_code, hub.region_name
+<span class="text-primary font-bold">ORDER BY</span> avg_savings_percentage <span class="text-primary font-bold">DESC</span>;</pre>
+</div>
+<!-- Query Results Table -->
+<div class="border-t border-white/10 bg-surface-container-lowest/50 p-6 overflow-x-auto">
+<div class="flex justify-between items-center mb-4 font-code-sm text-xs text-outline">
+<span>QUERY RESULTS (4 rows returned in 11ms)</span>
+<div class="flex gap-4">
+<button class="hover:text-on-surface transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">download</span> Export CSV</button>
+<button class="hover:text-on-surface transition-colors flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">code</span> Export JSON</button>
+</div>
+</div>
+<table class="w-full text-left border-collapse font-code-sm text-sm">
+<thead>
+<tr class="border-b border-white/10 text-xs text-outline uppercase tracking-wider bg-white/[0.02]">
+<th class="py-3 px-4">facility_code</th>
+<th class="py-3 px-4">region_name</th>
+<th class="py-3 px-4">total_optimizations</th>
+<th class="py-3 px-4 text-right">avg_savings_percentage</th>
+<th class="py-3 px-4 text-right">cumulative_km_saved</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5 text-on-surface">
+<tr class="hover:bg-white/[0.03] transition-colors">
+<td class="py-3 px-4 font-bold text-primary">HUB_ORD_01</td>
+<td class="py-3 px-4 text-outline-variant">Midwest Central (Chicago)</td>
+<td class="py-3 px-4">1,420</td>
+<td class="py-3 px-4 text-right font-bold text-secondary-fixed-dim">18.42%</td>
+<td class="py-3 px-4 text-right">482,910 km</td>
+</tr>
+<tr class="hover:bg-white/[0.03] transition-colors">
+<td class="py-3 px-4 font-bold text-primary">HUB_LAX_04</td>
+<td class="py-3 px-4 text-outline-variant">West Coast (Los Angeles)</td>
+<td class="py-3 px-4">980</td>
+<td class="py-3 px-4 text-right font-bold text-secondary-fixed-dim">16.85%</td>
+<td class="py-3 px-4 text-right">312,400 km</td>
+</tr>
+<tr class="hover:bg-white/[0.03] transition-colors">
+<td class="py-3 px-4 font-bold text-primary">HUB_ATL_02</td>
+<td class="py-3 px-4 text-outline-variant">Southeast (Atlanta)</td>
+<td class="py-3 px-4">1,150</td>
+<td class="py-3 px-4 text-right font-bold text-secondary-fixed-dim">15.10%</td>
+<td class="py-3 px-4 text-right">289,150 km</td>
+</tr>
+<tr class="hover:bg-white/[0.03] transition-colors">
+<td class="py-3 px-4 font-bold text-primary">HUB_NYC_09</td>
+<td class="py-3 px-4 text-outline-variant">Northeast (New York Metro)</td>
+<td class="py-3 px-4">840</td>
+<td class="py-3 px-4 text-right font-bold text-secondary-fixed-dim">12.94%</td>
+<td class="py-3 px-4 text-right">198,320 km</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<!-- Saved KPI Views & Database Schema Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+<div class="glass-panel p-6 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary text-2xl">table_chart</span>
+<span class="font-code-sm text-xs text-outline">Table View</span>
+</div>
+<h3 class="font-headline-md text-lg font-bold text-on-surface">logistics_hubs</h3>
+<p class="text-xs text-outline-variant font-code-sm">Primary key (`hub_id`), geo-coordinates, capacity limits, cold-chain qualification boolean.</p>
+</div>
+<div class="glass-panel p-6 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-secondary-fixed-dim text-2xl">route</span>
+<span class="font-code-sm text-xs text-outline">Table View</span>
+</div>
+<h3 class="font-headline-md text-lg font-bold text-on-surface">optimization_history</h3>
+<p class="text-xs text-outline-variant font-code-sm">Foreign key (`hub_id`), solver type (`SCIP`/`GLS`), compute time, cost delta, active constraints.</p>
+</div>
+<div class="glass-panel p-6 rounded-xl space-y-3">
+<div class="flex items-center justify-between">
+<span class="material-symbols-outlined text-primary text-2xl">timeline</span>
+<span class="font-code-sm text-xs text-outline">Table View</span>
+</div>
+<h3 class="font-headline-md text-lg font-bold text-on-surface">telemetry_streams</h3>
+<p class="text-xs text-outline-variant font-code-sm">Real-time GPS pings, truck axle weights, refrigerated trailer temperature logs, driver shift clocks.</p>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="border-t border-white/5 bg-surface-container-lowest py-6 mt-auto">
+<div class="max-w-max-width mx-auto px-margin-desktop flex flex-col md:flex-row items-center justify-between gap-4 font-code-sm text-xs text-outline">
+<div>AI LOGISTICS OPTIMIZER — SQLITE ENTERPRISE ANALYTICS STUDIO</div>
+<div class="flex gap-6">
+<a class="hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-on-surface transition-colors" href="#">System Status</a>
+</div>
+</div>
+</footer>
+<script>
+        function runQuery() {
+            const btn = document.querySelector('button[onclick="runQuery()"]');
+            if(btn) {
+                const oldText = btn.innerHTML;
+                btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[16px]">refresh</span> Executing...`;
+                setTimeout(() => {
+                    btn.innerHTML = oldText;
+                    alert("Query executed successfully! 4 rows returned in 11ms from local SQLite memory buffer.");
+                }, 500);
+            }
+        }
+    </script>
+</body>
+</html>

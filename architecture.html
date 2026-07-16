@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Architecture & System Health | LogisticsOptimizer AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#00dbe9",
+                    "surface-container-lowest": "#0b0f10",
+                    "surface-container": "#1d2022",
+                    "surface-bright": "#363a3b",
+                    "inverse-on-surface": "#2d3133",
+                    "surface": "#101415",
+                    "on-secondary-container": "#00686f",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-secondary": "#00363a",
+                    "tertiary-container": "#6a6d77",
+                    "outline-variant": "#434655",
+                    "primary-fixed": "#dbe1ff",
+                    "inverse-primary": "#0053db",
+                    "on-surface-variant": "#c3c6d7",
+                    "on-tertiary-fixed": "#181b24",
+                    "on-background": "#e0e3e5",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "tertiary-fixed": "#e0e2ee",
+                    "surface-variant": "#323537",
+                    "on-tertiary": "#2d3039",
+                    "background": "#101415",
+                    "on-error-container": "#ffdad6",
+                    "surface-dim": "#101415",
+                    "surface-container-high": "#272a2c",
+                    "surface-container-low": "#191c1e",
+                    "on-error": "#690005",
+                    "on-surface": "#e0e3e5",
+                    "tertiary-fixed-dim": "#c4c6d2",
+                    "outline": "#8d90a0",
+                    "on-primary-fixed": "#00174b",
+                    "inverse-surface": "#e0e3e5",
+                    "secondary-fixed": "#7df4ff",
+                    "on-secondary-fixed": "#002022",
+                    "tertiary": "#c4c6d2",
+                    "secondary": "#d3fbff",
+                    "primary-container": "#2563eb",
+                    "surface-tint": "#b4c5ff",
+                    "surface-container-highest": "#323537",
+                    "on-tertiary-container": "#eef0fc",
+                    "secondary-container": "#00eefc",
+                    "on-primary": "#002a78",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-tertiary-fixed-variant": "#444650",
+                    "on-primary-container": "#eeefff",
+                    "primary": "#b4c5ff",
+                    "error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "gutter": "24px",
+                    "max-width": "1280px",
+                    "margin-desktop": "80px",
+                    "margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "display-xl": ["Outfit"],
+                    "display-xl-mobile": ["Outfit"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-lg": ["Outfit"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md": ["Outfit"],
+                    "headline-lg": ["Outfit"],
+                    "body-md": ["Outfit"]
+            },
+            "fontSize": {
+                    "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-xl-mobile": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "code-sm": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+      body {
+        background-color: #101415;
+        color: #e0e3e5;
+        overflow-x: hidden;
+      }
+      .glass-card {
+        background: rgba(16, 20, 21, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      }
+      .glow-sapphire {
+        box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
+      }
+      .active-data-flow {
+        background: linear-gradient(90deg, transparent, #2563eb, transparent);
+        background-size: 200% 100%;
+        animation: dataFlow 2s linear infinite;
+      }
+      @keyframes dataFlow {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+      }
+      .pulse-indicator {
+        animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: .5; }
+      }
+    </style>
+</head>
+<body class="font-body-md bg-background text-on-background">
+<!-- Top Navigation Bar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl border-b border-white/10 shadow-[0_0_15px_rgba(37,99,235,0.2)]">
+<div class="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop max-w-max-width mx-auto">
+<a href="overview.html" class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim tracking-tight">
+                LogisticsOptimizer AI
+            </a>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="overview.html">Command Center</a>
+<a class="text-secondary-fixed-dim font-bold border-b-2 border-secondary-fixed-dim pb-1" href="architecture.html">Architecture</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="solvers.html">Solvers</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="forecasting.html">ML Forecaster</a>
+<a class="text-on-surface-variant hover:text-on-surface transition-colors" href="analytics.html">Analytics</a>
+</div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-white/5 p-2 rounded-full transition-all">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:bg-white/5 p-2 rounded-full transition-all">settings</span>
+<a href="login.html" title="Switch User / Sign Out" class="w-8 h-8 rounded-full overflow-hidden border border-primary-fixed-dim block">
+<img class="w-full h-full object-cover" data-alt="User Avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBbHFVJDMDNFrnVV__nMgWbcWDFpM-IFYpABZc9BKKQ35iWz6wEcjS_npfx_hUCjYB_23PE6yhiJ40UoxI-gUeulY55uWMjfZmdfdj4ri8Bq7AD3cscOew4LYOWz0wzHJubgjNdTtt3v29fZXV68gbDp7wYiPReEIHO_iKFWl0sWzu02BJarwon4RrYCMwBZokNKF83SxKltXlBHgFFAW2IU4qlfF9yasxOZczfBx64nki049-3uZNC"/>
+</a>
+</div>
+</div>
+</nav>
+<!-- Side Navigation Bar -->
+<aside class="hidden lg:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-64 bg-surface-container-lowest border-r border-white/5 z-40">
+<div class="p-6">
+<div class="flex items-center gap-3 mb-8">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">analytics</span>
+</div>
+<div>
+<h2 class="font-headline-lg text-[16px] text-on-surface leading-tight">Optimizer v4.2</h2>
+<p class="font-label-caps text-label-caps text-on-surface-variant opacity-60">Enterprise Tier</p>
+</div>
+</div>
+<nav class="space-y-1">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all duration-200" href="overview.html">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Overview</span>
+</a>
+<a class="bg-primary-container/20 text-secondary-fixed-dim border-r-4 border-secondary-fixed-dim flex items-center gap-3 px-4 py-3 rounded-l-xl transition-all" href="architecture.html">
+<span class="material-symbols-outlined">account_tree</span>
+<span class="font-label-caps text-label-caps">Architecture</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all" href="solvers.html">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-caps text-label-caps">OR Solvers</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all" href="forecasting.html">
+<span class="material-symbols-outlined">query_stats</span>
+<span class="font-label-caps text-label-caps">Forecasting</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-3 hover:bg-white/5 rounded-xl transition-all" href="analytics.html">
+<span class="material-symbols-outlined">database</span>
+<span class="font-label-caps text-label-caps">KPI SQL</span>
+</a>
+</nav>
+</div>
+<div class="mt-auto p-6 space-y-4">
+<button onclick="alert('Deploying updated MILP & VRP model to local edge node... Complete.')" class="w-full py-3 px-4 bg-primary text-on-primary font-bold rounded-xl active:scale-95 transition-transform">
+                Deploy Model
+            </button>
+<div class="pt-4 border-t border-white/5">
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-2 hover:text-secondary-fixed-dim transition-colors" href="https://github.com/ATRIK171005/AI_Logistics_Optimizer" target="_blank">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span class="font-label-caps text-label-caps">Documentation</span>
+</a>
+<a class="text-on-surface-variant flex items-center gap-3 px-4 py-2 hover:text-secondary-fixed-dim transition-colors" href="login.html">
+<span class="material-symbols-outlined text-[18px]">support_agent</span>
+<span class="font-label-caps text-label-caps">Sign Out</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="lg:ml-64 pt-24 pb-16 px-margin-mobile md:px-margin-desktop min-h-screen">
+<div class="max-w-max-width mx-auto">
+<header class="mb-12">
+<h1 class="font-display-xl-mobile md:font-display-xl text-display-xl-mobile md:text-display-xl text-on-surface mb-2">System Architecture</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Visualizing the end-to-end data flow between ingestion origins, optimization hubs, and final logistics destinations.</p>
+</header>
+<!-- Architecture Diagram Bento Grid Section -->
+<section class="grid grid-cols-1 lg:grid-cols-12 gap-gutter mb-12">
+<!-- System Diagram Main Card -->
+<div class="lg:col-span-8 glass-card rounded-xl p-8 min-h-[500px] relative overflow-hidden">
+<div class="flex justify-between items-center mb-10">
+<h3 class="font-headline-md text-headline-md">Topology Core</h3>
+<div class="flex items-center gap-2 px-3 py-1 bg-secondary-fixed-dim/10 text-secondary-fixed-dim border border-secondary-fixed-dim/20 rounded-full">
+<span class="w-2 h-2 rounded-full bg-secondary-fixed-dim pulse-indicator"></span>
+<span class="font-label-caps text-label-caps">Live Data Flow</span>
+</div>
+</div>
+<!-- Flow Diagram Visualization -->
+<div class="relative h-full w-full flex flex-col md:flex-row items-center justify-between gap-12 md:gap-4 py-8">
+<!-- Origins -->
+<div class="flex flex-col items-center gap-6 z-10 w-full md:w-1/4">
+<p class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">Origins</p>
+<div class="w-full glass-card p-4 rounded-xl text-center border-l-4 border-l-secondary-fixed-dim">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-1">inventory</span>
+<p class="font-code-sm text-code-sm">Inventory API</p>
+</div>
+<div class="w-full glass-card p-4 rounded-xl text-center border-l-4 border-l-secondary-fixed-dim">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-1">sensors</span>
+<p class="font-code-sm text-code-sm">IoT Telemetry</p>
+</div>
+</div>
+<!-- Connector Lines (Visual) -->
+<div class="hidden md:block absolute top-1/2 left-1/4 right-1/4 h-1 px-4 transform -translate-y-1/2">
+<div class="w-full h-[2px] active-data-flow opacity-40"></div>
+</div>
+<!-- Hubs (Centroid) -->
+<div class="flex flex-col items-center gap-6 z-10 w-full md:w-1/3">
+<p class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">Optimization Hub</p>
+<div class="w-full bg-primary-container/20 border border-primary/30 p-8 rounded-full aspect-square flex flex-col items-center justify-center relative glow-sapphire">
+<div class="absolute inset-0 rounded-full border border-primary/20 animate-spin" style="animation-duration: 10s;"></div>
+<span class="material-symbols-outlined text-primary text-4xl mb-2" style="font-variation-settings: 'FILL' 1;">hub</span>
+<p class="font-headline-md text-[18px] text-center">Central Optimizer</p>
+<p class="font-code-sm text-code-sm text-primary opacity-80">v4.2.1-stable</p>
+</div>
+</div>
+<!-- Connector Lines (Visual) -->
+<div class="hidden md:block absolute top-1/2 left-2/3 right-0 h-1 px-4 transform -translate-y-1/2">
+<div class="w-full h-[2px] active-data-flow opacity-40"></div>
+</div>
+<!-- Destinations -->
+<div class="flex flex-col items-center gap-6 z-10 w-full md:w-1/4">
+<p class="font-label-caps text-label-caps text-on-surface-variant tracking-widest uppercase">Destinations</p>
+<div class="w-full glass-card p-4 rounded-xl text-center border-r-4 border-r-secondary-fixed-dim">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-1">local_shipping</span>
+<p class="font-code-sm text-code-sm">Fleet Management</p>
+</div>
+<div class="w-full glass-card p-4 rounded-xl text-center border-r-4 border-r-secondary-fixed-dim">
+<span class="material-symbols-outlined text-secondary-fixed-dim mb-1">dashboard_customize</span>
+<p class="font-code-sm text-code-sm">Client Webhook</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Telemetry Sidebar Card -->
+<div class="lg:col-span-4 flex flex-col gap-gutter">
+<!-- CPU/RAM Telemetry -->
+<div class="glass-card rounded-xl p-6 flex-1">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-4 flex items-center justify-between">
+                            Resources <span class="font-code-sm lowercase opacity-50">live</span>
+</h4>
+<div class="space-y-6">
+<div>
+<div class="flex justify-between font-code-sm text-code-sm mb-2">
+<span>CPU Utilization</span>
+<span class="text-secondary-fixed-dim">42.8%</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary-fixed-dim" style="width: 42.8%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-code-sm text-code-sm mb-2">
+<span>RAM Usage</span>
+<span class="text-secondary-fixed-dim">6.2 / 16 GB</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary-fixed-dim" style="width: 38.7%;"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between font-code-sm text-code-sm mb-2">
+<span>Network Latency</span>
+<span class="text-secondary-fixed-dim">14ms</span>
+</div>
+<div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
+<div class="h-full bg-gradient-to-r from-primary to-secondary-fixed-dim" style="width: 12%;"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Database Health -->
+<div class="glass-card rounded-xl p-6 flex-1 border-t-2 border-t-primary">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-4">Storage Layer</h4>
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-fixed-dim text-3xl">database</span>
+</div>
+<div>
+<p class="font-body-md font-bold">SQLite 3NF Schema</p>
+<p class="font-code-sm text-code-sm text-on-surface-variant">Status: <span class="text-green-400">Operational</span></p>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-white/5 grid grid-cols-2 gap-4">
+<div>
+<p class="font-label-caps text-[10px] opacity-50 uppercase">Size</p>
+<p class="font-code-sm text-code-sm">1.28 GB</p>
+</div>
+<div>
+<p class="font-label-caps text-[10px] opacity-50 uppercase">Uptime</p>
+<p class="font-code-sm text-code-sm">14d 2h 11m</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Engine Health Cards -->
+<h3 class="font-headline-md text-headline-md mb-6">Engine Performance</h3>
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- OR-Tools SCIP -->
+<a href="solvers.html" class="glass-card rounded-xl p-6 hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all block">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim p-2 bg-primary/10 rounded-lg">function</span>
+<div class="bg-green-500/10 text-green-400 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Stable</div>
+</div>
+<h4 class="font-headline-md text-[18px] mb-1">SCIP Solver</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mb-4">OR-Tools Engine</p>
+<div class="flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span class="font-code-sm">4.2ms avg resolve</span>
+</div>
+</a>
+<!-- OR-Tools CBC -->
+<a href="solvers.html" class="glass-card rounded-xl p-6 hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all block">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-primary-fixed-dim p-2 bg-primary/10 rounded-lg">calculate</span>
+<div class="bg-green-500/10 text-green-400 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Stable</div>
+</div>
+<h4 class="font-headline-md text-[18px] mb-1">CBC Solver</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mb-4">Linear Programming</p>
+<div class="flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-[16px]">speed</span>
+<span class="font-code-sm">8.1ms avg resolve</span>
+</div>
+</a>
+<!-- XGBoost -->
+<a href="forecasting.html" class="glass-card rounded-xl p-6 border-l-2 border-l-secondary-fixed-dim hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all block">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary-fixed-dim p-2 bg-secondary-fixed-dim/10 rounded-lg">psychology</span>
+<div class="bg-green-500/10 text-green-400 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Optimal</div>
+</div>
+<h4 class="font-headline-md text-[18px] mb-1">XGBoost</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mb-4">Demand Forecast</p>
+<div class="flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span class="font-code-sm">98.2% Accuracy</span>
+</div>
+</a>
+<!-- RandomForest -->
+<a href="forecasting.html" class="glass-card rounded-xl p-6 border-l-2 border-l-secondary-fixed-dim hover:shadow-[0_0_20px_rgba(37,99,235,0.15)] transition-all block">
+<div class="flex justify-between items-start mb-4">
+<span class="material-symbols-outlined text-secondary-fixed-dim p-2 bg-secondary-fixed-dim/10 rounded-lg">account_tree</span>
+<div class="bg-green-500/10 text-green-400 text-[10px] px-2 py-0.5 rounded uppercase font-bold">Optimal</div>
+</div>
+<h4 class="font-headline-md text-[18px] mb-1">RandomForest</h4>
+<p class="font-code-sm text-code-sm text-on-surface-variant mb-4">Risk Assessment</p>
+<div class="flex items-center gap-2 text-sm">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+<span class="font-code-sm">96.5% Accuracy</span>
+</div>
+</a>
+</section>
+</div>
+</main>
+<!-- Footer -->
+<footer class="w-full border-t border-white/5 bg-surface-container-lowest">
+<div class="flex justify-between items-center py-6 px-margin-desktop max-w-max-width mx-auto">
+<div class="font-code-sm text-code-sm text-on-surface-variant">
+                © 2024 AI Logistics Corp. Internal Use Only.
+            </div>
+<div class="flex gap-8">
+<a class="font-code-sm text-code-sm text-outline hover:text-secondary-fixed-dim transition-colors" href="#">Security</a>
+<a class="font-code-sm text-code-sm text-outline hover:text-secondary-fixed-dim transition-colors" href="#">API Docs</a>
+<a class="font-code-sm text-code-sm text-outline hover:text-secondary-fixed-dim transition-colors" href="#">Service Status</a>
+</div>
+</div>
+</footer>
+<script>
+        // Micro-interaction for resource telemetry
+        function updateTelemetry() {
+            const cpu = document.querySelector('[style*="width: 42.8%"]');
+            const ram = document.querySelector('[style*="width: 38.7%"]');
+            
+            // Random jitter for simulation
+            setInterval(() => {
+                const cpuVal = (40 + Math.random() * 5).toFixed(1);
+                const ramVal = (38 + Math.random() * 2).toFixed(1);
+                
+                if(cpu && cpu.parentElement.previousElementSibling) {
+                    cpu.parentElement.previousElementSibling.lastElementChild.innerText = `${cpuVal}%`;
+                    cpu.style.width = `${cpuVal}%`;
+                }
+                if(ram) {
+                    ram.style.width = `${ramVal}%`;
+                }
+            }, 3000);
+        }
+        
+        document.addEventListener('DOMContentLoaded', updateTelemetry);
+    </script>
+</body>
+</html>

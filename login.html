@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Team Logistics Access | AI Logistics Optimizer</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=JetBrains+Mono:wght@100..800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed": "#002022",
+                    "on-error-container": "#ffdad6",
+                    "surface-container-high": "#272a2c",
+                    "surface-container": "#1d2022",
+                    "tertiary-fixed": "#e0e2ee",
+                    "on-background": "#e0e3e5",
+                    "on-primary": "#002a78",
+                    "surface-container-lowest": "#0b0f10",
+                    "surface": "#101415",
+                    "tertiary": "#c4c6d2",
+                    "secondary-fixed-dim": "#00dbe9",
+                    "on-tertiary-fixed": "#181b24",
+                    "secondary": "#d3fbff",
+                    "on-tertiary": "#2d3039",
+                    "on-tertiary-container": "#eef0fc",
+                    "on-primary-fixed-variant": "#003ea8",
+                    "on-primary-fixed": "#00174b",
+                    "on-primary-container": "#eeefff",
+                    "surface-container-highest": "#323537",
+                    "on-tertiary-fixed-variant": "#444650",
+                    "on-surface": "#e0e3e5",
+                    "tertiary-container": "#6a6d77",
+                    "surface-bright": "#363a3b",
+                    "primary-fixed": "#dbe1ff",
+                    "inverse-surface": "#e0e3e5",
+                    "tertiary-fixed-dim": "#c4c6d2",
+                    "surface-tint": "#b4c5ff",
+                    "background": "#101415",
+                    "primary-container": "#2563eb",
+                    "on-secondary": "#00363a",
+                    "on-surface-variant": "#c3c6d7",
+                    "on-secondary-container": "#00686f",
+                    "surface-container-low": "#191c1e",
+                    "outline": "#8d90a0",
+                    "on-error": "#690005",
+                    "inverse-primary": "#0053db",
+                    "inverse-on-surface": "#2d3133",
+                    "error": "#ffb4ab",
+                    "outline-variant": "#434655",
+                    "surface-dim": "#101415",
+                    "primary": "#b4c5ff",
+                    "primary-fixed-dim": "#b4c5ff",
+                    "on-secondary-fixed-variant": "#004f54",
+                    "error-container": "#93000a",
+                    "secondary-container": "#00eefc",
+                    "surface-variant": "#323537",
+                    "secondary-fixed": "#7df4ff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-desktop": "80px",
+                    "gutter": "24px",
+                    "max-width": "1280px",
+                    "margin-mobile": "20px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Outfit"],
+                    "label-caps": ["JetBrains Mono"],
+                    "display-xl-mobile": ["Outfit"],
+                    "body-md": ["Outfit"],
+                    "code-sm": ["JetBrains Mono"],
+                    "body-lg": ["Outfit"],
+                    "headline-md": ["Outfit"],
+                    "display-xl": ["Outfit"]
+            },
+            "fontSize": {
+                    "headline-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.1em", "fontWeight": "700"}],
+                    "display-xl-mobile": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "code-sm": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "display-xl": ["72px", {"lineHeight": "80px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+    <style>
+        body {
+            background-color: #0b0f10;
+            background-image: 
+                radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0);
+            background-size: 32px 32px;
+            color: #e0e3e5;
+        }
+
+        .glass-panel {
+            background: rgba(16, 20, 21, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glow-primary:hover {
+            box-shadow: 0 0 15px rgba(37, 99, 235, 0.4);
+        }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+
+        .tab-active {
+            color: #b4c5ff;
+            border-bottom: 2px solid #2563eb;
+        }
+
+        input::placeholder {
+            color: #434655;
+            opacity: 0.8;
+        }
+
+        .network-grid {
+            mask-image: radial-gradient(circle at center, black, transparent 80%);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-md overflow-x-hidden">
+<!-- Top Navigation -->
+<header class="fixed top-0 left-0 w-full z-50 h-20 flex items-center px-margin-mobile md:px-margin-desktop">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary-container text-3xl">hub</span>
+<span class="font-headline-md text-headline-md font-bold tracking-tight text-on-surface">AI Logistics Optimizer</span>
+</div>
+</header>
+<main class="flex-grow flex items-center justify-center relative pt-24 pb-12 px-margin-mobile">
+<!-- Background Animation Effect -->
+<div class="absolute inset-0 z-0 opacity-20 pointer-events-none network-grid"></div>
+<div class="w-full max-w-lg z-10">
+<!-- Auth Container -->
+<div class="glass-panel rounded-xl p-8 md:p-10 transition-all duration-500">
+<!-- Toggle Header -->
+<div class="flex border-b border-outline-variant mb-8">
+<button class="flex-1 py-4 font-label-caps text-label-caps tracking-widest tab-active transition-all duration-300" id="loginTab" onclick="switchTab('login')">
+                        LOGIN
+                    </button>
+<button class="flex-1 py-4 font-label-caps text-label-caps tracking-widest text-on-surface-variant hover:text-on-surface transition-all duration-300" id="signupTab" onclick="switchTab('signup')">
+                        CREATE TEAM ACCOUNT
+                    </button>
+</div>
+<div class="space-y-6" id="authContent">
+<!-- Form Title -->
+<div>
+<h2 class="font-headline-lg text-headline-lg mb-2" id="formHeader">Command Center Access</h2>
+<p class="font-body-md text-on-surface-variant">Enter your credentials to manage active logistics nodes.</p>
+</div>
+<!-- Input Groups -->
+<div class="space-y-4">
+<div class="space-y-1.5">
+<label class="font-label-caps text-label-caps text-primary/80 block">Professional Email</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">alternate_email</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-3 pl-10 pr-4 focus:ring-1 focus:ring-secondary-container focus:border-secondary-container outline-none transition-all font-body-md" placeholder="name@company.com" type="email" value="atrik.samanta@maersk-logistics.com"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="font-label-caps text-label-caps text-primary/80 block">Team Access Key</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">key</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-3 pl-10 pr-4 focus:ring-1 focus:ring-secondary-container focus:border-secondary-container outline-none transition-all font-code-sm text-code-sm tracking-widest uppercase" placeholder="TX-8829-LOG" type="text" value="MAERSK-HUB-APAC"/>
+</div>
+</div>
+<div class="space-y-1.5">
+<label class="font-label-caps text-label-caps text-primary/80 block">Secure Password</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline-variant">lock</span>
+<input class="w-full bg-surface-container-lowest border border-outline-variant rounded-lg py-3 pl-10 pr-4 focus:ring-1 focus:ring-secondary-container focus:border-secondary-container outline-none transition-all font-body-md" placeholder="••••••••" type="password" value="••••••••••••"/>
+</div>
+</div>
+</div>
+<!-- Invitation / Join Section -->
+<div class="bg-surface-container-high/40 rounded-lg p-5 border border-primary/10">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-secondary-container text-sm">group_add</span>
+<span class="font-label-caps text-label-caps text-on-surface">Join Your Team's Logistics</span>
+</div>
+<p class="text-sm text-on-surface-variant mb-4 font-body-md">Joining an existing workflow? Enter the invitation code below.</p>
+<div class="relative">
+<input class="w-full bg-surface-container-lowest/50 border-dashed border-2 border-outline-variant/50 rounded-lg py-3 px-4 text-center font-code-sm text-code-sm tracking-[0.4em] uppercase focus:border-primary transition-colors outline-none" placeholder="ENTER 6-DIGIT CODE" type="text" value="882941"/>
+</div>
+</div>
+<!-- Action Button -->
+<button onclick="enterCommandCenter(event)" class="w-full bg-primary-container text-on-primary-container py-4 rounded-lg font-headline-md text-body-lg font-bold flex items-center justify-center gap-2 group glow-primary transition-all active:scale-95">
+<span id="authBtnText">Enter Command Center</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">terminal</span>
+</button>
+<!-- Security Indicator -->
+<div class="flex items-center justify-between text-[11px] font-label-caps text-on-surface-variant/60 pt-4 border-t border-outline-variant/30">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+<span>Encrypted Session Active</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[14px]">lock_clock</span>
+<span>AES-256 Protocol</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Links -->
+<div class="mt-8 flex justify-center gap-8 text-on-surface-variant/60 font-label-caps text-[10px] tracking-widest">
+<a class="hover:text-primary transition-colors" href="#">HELP DESK</a>
+<a class="hover:text-primary transition-colors" href="#">SECURITY PROTOCOL</a>
+<a class="hover:text-primary transition-colors" href="#">API ACCESS</a>
+</div>
+</div>
+</main>
+<!-- Visual Highlight Grid Background Layer -->
+<div class="fixed inset-0 pointer-events-none -z-10 bg-[#0b0f10]">
+<div class="absolute top-0 left-1/4 w-[500px] h-[500px] bg-primary/5 blur-[120px] rounded-full"></div>
+<div class="absolute bottom-0 right-1/4 w-[600px] h-[600px] bg-secondary-container/5 blur-[150px] rounded-full"></div>
+</div>
+<!-- Global Footer -->
+<footer class="py-12 mt-auto border-t border-outline-variant bg-background">
+<div class="max-w-max-width mx-auto px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-6">
+<span class="font-label-caps text-label-caps text-on-surface">© 2024 AI LOGISTICS OPTIMIZER. MIT LICENSE.</span>
+<div class="flex gap-6">
+<a class="font-body-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Documentation</a>
+<a class="font-body-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Contact</a>
+<a class="font-body-md text-on-surface-variant hover:text-secondary transition-colors" href="#">Privacy</a>
+</div>
+</div>
+</footer>
+<script>
+        function switchTab(mode) {
+            const loginTab = document.getElementById('loginTab');
+            const signupTab = document.getElementById('signupTab');
+            const formHeader = document.getElementById('formHeader');
+            const authBtnText = document.getElementById('authBtnText');
+
+            if (mode === 'login') {
+                loginTab.classList.add('tab-active', 'text-primary');
+                loginTab.classList.remove('text-on-surface-variant');
+                signupTab.classList.remove('tab-active', 'text-primary');
+                signupTab.classList.add('text-on-surface-variant');
+                formHeader.innerText = 'Command Center Access';
+                authBtnText.innerText = 'Enter Command Center';
+            } else {
+                signupTab.classList.add('tab-active', 'text-primary');
+                signupTab.classList.remove('text-on-surface-variant');
+                loginTab.classList.remove('tab-active', 'text-primary');
+                loginTab.classList.add('text-on-surface-variant');
+                formHeader.innerText = 'Create Team Account';
+                authBtnText.innerText = 'Initialize Deployment';
+            }
+        }
+
+        function enterCommandCenter(e) {
+            e.preventDefault();
+            const btnText = document.getElementById('authBtnText');
+            btnText.innerText = 'Authenticating Session...';
+            setTimeout(() => {
+                window.location.href = 'overview.html';
+            }, 600);
+        }
+
+        // Mouse follow effect for the card
+        const card = document.querySelector('.glass-panel');
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            const moveX = (x - 0.5) * 15;
+            const moveY = (y - 0.5) * 15;
+            
+            if(card) {
+                card.style.transform = `perspective(1000px) rotateX(${moveY * -1}deg) rotateY(${moveX}deg)`;
+            }
+        });
+    </script>
+</body>
+</html>
